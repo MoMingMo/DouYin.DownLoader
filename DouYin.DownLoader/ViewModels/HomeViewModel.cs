@@ -30,7 +30,7 @@ namespace DouYin.DownLoader.ViewModels
                 var awemeDetail = await _douYinDownlaodService.GetAwemeDetailAsync(Url);
                 if (awemeDetail.status_code != 0)
                 {
-                    WeakReferenceMessenger.Default.Send(new ShowMessage("请求接口异常"));
+                    WeakReferenceMessenger.Default.Send(new NotifyMessage("请求接口异常"));
                     return;
                 }
                 var author = awemeDetail!.aweme_detail!.author!;
@@ -67,7 +67,7 @@ namespace DouYin.DownLoader.ViewModels
             }
             catch (Exception ex)
             {
-                WeakReferenceMessenger.Default.Send(new ShowMessage("下载数据异常"));
+                WeakReferenceMessenger.Default.Send(new NotifyMessage("下载数据异常"));
             }
         }
 

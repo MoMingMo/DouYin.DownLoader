@@ -3,12 +3,12 @@ using Jint;
 using System.IO;
 using System.Net.Http;
 using System.Net.Http.Json;
-using System.Security.Policy;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Web;
 using DouYin.DownLoader.Common;
 using DouYin.DownLoader.Common.Models;
+using System.Windows.Interop;
 
 namespace DouYin.DownLoader.Services
 {
@@ -49,8 +49,6 @@ namespace DouYin.DownLoader.Services
 
         public async Task DownLoadVideoAsync(VideoItem video)
         {
-            var msg = $"开始下载{video.NikName}-{video.AwemeId}的相关文件";
-            WeakReferenceMessenger.Default.Send(new ShowMessage(msg));
             var directory = $"{video.NikName}_{video.UId}\\";
             directory += video.AwemeType == 68 ? "images\\" : "";
             if (!Directory.Exists(directory))
@@ -62,6 +60,7 @@ namespace DouYin.DownLoader.Services
             var videoFileName = $"{directory}{video.AwemeId}.mp4";
             try
             {
+                string? msg;
                 if (!File.Exists(coverFileName))
                 {
                     using (HttpResponseMessage response = await _client.GetAsync(video.VideoCover, HttpCompletionOption.ResponseHeadersRead))
@@ -77,7 +76,7 @@ namespace DouYin.DownLoader.Services
                         }
                     }
                     msg = $"下载完成{video.NikName}-{video.AwemeId}的封面";
-                    WeakReferenceMessenger.Default.Send(new ShowMessage(msg));
+                    WeakReferenceMessenger.Default.Send(new NotifyMessage(msg));
                 }
                 if (video.AwemeType == 68 && video.Images is { Count: > 0 })
                 {
@@ -105,7 +104,7 @@ namespace DouYin.DownLoader.Services
                         }
                     }
                     msg = $"下载完成{video.NikName}-{video.AwemeId}的图集";
-                    WeakReferenceMessenger.Default.Send(new ShowMessage(msg));
+                    WeakReferenceMessenger.Default.Send(new NotifyMessage(msg));
                 }
                 else 
                 {
@@ -124,7 +123,7 @@ namespace DouYin.DownLoader.Services
                             }
                         }
                         msg = $"下载完成{video.NikName}-{video.AwemeId}的视频";
-                        WeakReferenceMessenger.Default.Send(new ShowMessage(msg));
+                        WeakReferenceMessenger.Default.Send(new NotifyMessage(msg));
                     }
                 }
 
@@ -133,17 +132,15 @@ namespace DouYin.DownLoader.Services
             }
             catch (Exception)
             {
-
                 throw;
             }
-
+   
         }
         private async Task<string> GenerateRequestParams(string url, string userAgent)
         {
 
             Uri uri = new(url);
             string query = HttpUtility.ParseQueryString(uri.Query).ToString()!;
-
             var engine = new Engine();
             engine.Execute(File.ReadAllText("./douyin_x-bogus.js"));
             var xbogus = engine.Invoke("sign", query, userAgent).AsString();

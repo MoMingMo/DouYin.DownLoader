@@ -18,5 +18,5 @@
         Music=3,
 
     }
-    public record ShowMessage(string message);
+    public record NotifyMessage(string message,bool isShowProcess=false);
 }

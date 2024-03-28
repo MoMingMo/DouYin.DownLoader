@@ -18,6 +18,8 @@ namespace DouYin.DownLoader.ViewModels
         private ViewModelBase? currentViewModel;
         [ObservableProperty]
         private string message;
+        [ObservableProperty]
+        private bool _isIndeterminate;
         public MainViewModel(Common.NavigationService navigationService)
         {
             _navigationService = navigationService;
@@ -30,10 +32,12 @@ namespace DouYin.DownLoader.ViewModels
                 };
             _navigationService.CurrentViewModelChanged += () => CurrentViewModel = _navigationService.CurrentViewModel;
             _navigationService.NavigateTo<HomeViewModel>();
-            WeakReferenceMessenger.Default.Register<ShowMessage>(this, (_, m) =>
+            WeakReferenceMessenger.Default.Register<NotifyMessage>(this, (_, m) =>
             {
                 Message = m.message;
+                IsIndeterminate=m.isShowProcess;
             });
+           
         }
         [RelayCommand]
         private void Navigate(MenuBar menu)
