@@ -31,7 +31,7 @@ namespace DouYin.DownLoader.ViewModels
                     new MenuBar(){ Icon="Cog",Title="设置",NameSpace=nameof(SettingViewModel)},
                 };
             _navigationService.CurrentViewModelChanged += () => CurrentViewModel = _navigationService.CurrentViewModel;
-            _navigationService.NavigateTo<HomeViewModel>();
+            _navigationService.NavigateTo<NoteViewModel>();
             WeakReferenceMessenger.Default.Register<NotifyMessage>(this, (_, m) =>
             {
                 Message = m.message;
