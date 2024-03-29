@@ -58,6 +58,13 @@ namespace DouYin.DownLoader.ViewModels
             }
             await Task.CompletedTask;
         }
+        [RelayCommand]
+        private async Task DownloadOne(VideoItem video)
+        {
+            await _douYinDownlaodService.DownLoadVideoAsync(video);
+            await Task.Delay(500);
+            await Task.CompletedTask;
+        }
         private async Task GetAwemeList()
         {
             WeakReferenceMessenger.Default.Send(new NotifyMessage("开始请求数据", true));
