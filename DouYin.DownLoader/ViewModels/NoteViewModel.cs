@@ -16,7 +16,7 @@ namespace DouYin.DownLoader.ViewModels
         private int hasMore = 1;
         private readonly IDouYinDownlaodService _douYinDownlaodService;
         [ObservableProperty]
-        private string _url = "https://www.douyin.com/user/MS4wLjABAAAAAk_GG0VItn8-7TcD_o4a9FV44d6zrYO4LDpBEU_wIr8?vid=7350636142548536628";
+        private string _url = "https://www.douyin.com/user/MS4wLjABAAAAyxCER8pqCDPMQN1DqoyaURTcR1lovESyiyZR6dYOaK9bdSR4X7mQQ8R7NRhZ4Lbp?vid=7344231935977327882";
         [ObservableProperty]
         private ICollection<VideoItem> _videoItems;
 
