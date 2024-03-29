@@ -25,7 +25,7 @@ namespace DouYin.DownLoader.ViewModels
             VideoItems = new List<VideoItem>();
             _douYinDownlaodService = douYinDownlaodService;
         }
-     
+
         [RelayCommand]
         private async Task GetData()
         {
@@ -42,7 +42,7 @@ namespace DouYin.DownLoader.ViewModels
                 await _douYinDownlaodService.DownLoadVideoAsync(item);
                 await Task.Delay(500);
             }
-            WeakReferenceMessenger.Default.Send(new NotifyMessage($"本次下载完成共{VideoItems.Count}条记录",false));
+            WeakReferenceMessenger.Default.Send(new NotifyMessage($"本次下载完成共{VideoItems.Count}条记录", false));
             await Task.CompletedTask;
         }
         [RelayCommand]
@@ -58,9 +58,16 @@ namespace DouYin.DownLoader.ViewModels
             }
             await Task.CompletedTask;
         }
+        [RelayCommand]
+        private async Task DownloadOne(VideoItem video)
+        {
+            await _douYinDownlaodService.DownLoadVideoAsync(video);
+            await Task.Delay(500);
+            await Task.CompletedTask;
+        }
         private async Task GetAwemeList()
         {
-            WeakReferenceMessenger.Default.Send(new NotifyMessage("开始请求数据",true));
+            WeakReferenceMessenger.Default.Send(new NotifyMessage("开始请求数据", true));
             var result = await _douYinDownlaodService.GetAuthorVideos(_userId!, _maxCursor);
             if (result.status_code != 0)
             {
@@ -79,7 +86,11 @@ namespace DouYin.DownLoader.ViewModels
                 VideoTag = string.Join(" ", x.video_tag!.Select(y => y.tag_name).ToList()),
                 VideoCover = x.video!.cover!.url_list![0],
                 Video = x.video!.play_addr!.url_list![0],
-                Images = x.images?.Select(x => x.url_list[0])?.ToList()
+                Images = x.images?.Select(x => x.url_list[0])?.ToList(),
+                CollectCount = x.statistics!.collect_count,
+                ShareCount = x.statistics!.share_count,
+                CommentCount = x.statistics!.comment_count,
+                DiggCount = x.statistics!.digg_count,
             }).ToList();
             VideoItems = VideoItems.Concat(videos).ToList();
             WeakReferenceMessenger.Default.Send(new NotifyMessage("获取数据成功", false));

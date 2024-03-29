@@ -5,6 +5,8 @@ using DouYin.DownLoader.Common;
 using DouYin.DownLoader.Services;
 using DouYin.DownLoader.ViewModels;
 using DouYin.DownLoader.Views;
+using Microsoft.Extensions.Configuration;
+using System.IO;
 
 namespace DouYin.DownLoader
 {
@@ -15,8 +17,15 @@ namespace DouYin.DownLoader
     {
         public App()
         {
+            var builder = new ConfigurationBuilder()
+            .SetBasePath(Directory.GetCurrentDirectory())
+            .AddJsonFile("appsettings.json");
+            var config = builder.Build();
+            Constant.SetCookie(config["Cookie"]!);
+
             Ioc.Default.ConfigureServices(
                 new ServiceCollection()
+
                 .AddHttpClient()
                 .AddTransient<MainViewModel>()
                 .AddTransient<MainView>()
