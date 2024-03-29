@@ -30,7 +30,8 @@
                                     CommandParameter="{Binding ElementName=MyScrollViewer}" />
                 </i:EventTrigger>
             </i:Interaction.Triggers>
-            <ItemsControl Grid.Row="1" ItemsSource="{Binding VideoItems}" HorizontalAlignment="Center" ScrollViewer.VerticalScrollBarVisibility="Hidden">
+            <ItemsControl  x:Name="videoListBox" Grid.Row="1" ItemsSource="{Binding VideoItems}" 
+                           HorizontalAlignment="Center" ScrollViewer.VerticalScrollBarVisibility="Hidden">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                         <WrapPanel/>
@@ -39,14 +40,35 @@
 
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <md:TransitioningContent >
-                            <md:Card Margin="5,5,0,0">
-                                <Grid Width="150" MinHeight="180" MaxHeight="200" >
-                                    <Image Margin="5" Source="{Binding VideoCover}" MinHeight="180" MinWidth="150" Stretch="Fill"/>
-                                    <TextBlock Margin="5"  FontSize="10" Text="{Binding Title}" Foreground="Yellow"  Width="150" FontWeight="Bold" HorizontalAlignment="Left"/>
-                                </Grid>
-                            </md:Card>
-                        </md:TransitioningContent>
+                        <md:Card Margin="5,5,0,0"  x:Name="xx" >
+                            <Grid Width="230" MinHeight="250" MaxHeight="280"  >
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="30"/>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="auto"/>
+                                </Grid.RowDefinitions>
+
+                                <TextBlock Panel.ZIndex="1"  Margin="10"  FontSize="10" Text="{Binding Title}" Foreground="Yellow"  Width="200" FontWeight="Bold" HorizontalAlignment="Left"/>
+                                <Image Grid.Row="0" Grid.RowSpan="3" Margin="5" Source="{Binding VideoCover}" MinHeight="250" MinWidth="200" Stretch="Fill"/>
+                                <StackPanel Width="230" Grid.Row="2" Orientation="Horizontal" Margin="8">
+                                    <md:PackIcon Kind="Heart" Margin="5"  />
+                                    <TextBlock Text="{Binding Digg}" FontSize="10" Margin="0,8" Width="30" Foreground="Yellow" />
+                                    <md:PackIcon Kind="Comment" Margin="5"  />
+                                    <TextBlock Text="{Binding Comment}" FontSize="10" Margin="0,8" Width="30" Foreground="Yellow" />
+                                    <md:PackIcon Kind="Star" Margin="5"  />
+                                    <TextBlock   Text="{Binding Collect}" FontSize="10" Margin="0,8" Width="30" Foreground="Yellow" />
+                                    <Button  x:Name="btnMember" Margin="0,0,5,0" Background="{x:Null}" BorderBrush="{x:Null}"
+                                             Height="20" Width="45"
+                                             HorizontalAlignment="Left"
+                                             CommandParameter="{Binding}"
+                                             Command="{Binding DataContext.DownloadOneCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                             >
+                                        <md:PackIcon Kind="Download" Foreground="Purple" />
+                                    </Button>
+                                  
+                                </StackPanel>
+                            </Grid>
+                        </md:Card>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
