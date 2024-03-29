@@ -27,7 +27,6 @@ namespace DouYin.DownLoader.ViewModels
                 {
                     new MenuBar(){ Icon="Home",Title="视频下载",NameSpace=nameof(HomeViewModel)},
                     new MenuBar(){ Icon="Note",Title="主页下载",NameSpace=nameof(NoteViewModel)},
-                    new MenuBar(){ Icon="NotebookOutline",Title="备忘录",NameSpace=nameof(HomeViewModel)},
                     new MenuBar(){ Icon="Cog",Title="设置",NameSpace=nameof(SettingViewModel)},
                 };
             _navigationService.CurrentViewModelChanged += () => CurrentViewModel = _navigationService.CurrentViewModel;
