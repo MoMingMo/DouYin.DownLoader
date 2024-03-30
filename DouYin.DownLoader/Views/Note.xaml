@@ -29,10 +29,10 @@
                 Command="{Binding DownloadCommand}"
                 Content="下载当前数据" />
         </DockPanel>
-        <ScrollViewer x:Name="MyScrollViewer" Grid.Row="1">
+        <ScrollViewer x:Name="videoScrollViewer" Grid.Row="1">
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="ScrollChanged">
-                    <i:InvokeCommandAction Command="{Binding ScrollToBottomCommand}" CommandParameter="{Binding ElementName=MyScrollViewer}" />
+                    <i:InvokeCommandAction Command="{Binding ScrollToBottomCommand}" CommandParameter="{Binding ElementName=videoScrollViewer}" />
                 </i:EventTrigger>
             </i:Interaction.Triggers>
             <ItemsControl
@@ -84,24 +84,35 @@
                                         Width="30" Margin="0,8" FontSize="10"
                                         Foreground="Yellow"
                                         Text="{Binding Digg}" />
-                                    <md:PackIcon Margin="5" Kind="Comment" />
-                                    <TextBlock
-                                        Width="30" Margin="0,8" FontSize="10"
-                                        Foreground="Yellow"
-                                        Text="{Binding Comment}" />
+
                                     <md:PackIcon Margin="5" Kind="Star" />
                                     <TextBlock
                                         Width="30" Margin="0,8" FontSize="10"
                                         Foreground="Yellow"
                                         Text="{Binding Collect}" />
+                                    <StackPanel Background="{x:Null}" Orientation="Horizontal">
+                                        <Button
+                                            Width="50" Height="20" Margin="-20,0,5,0"
+                                            HorizontalAlignment="Left"
+                                            Background="{x:Null}"
+                                            BorderBrush="{x:Null}"
+                                            Command="{Binding DataContext.ShowCommentCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding}">
+                                            <md:PackIcon Margin="0" Kind="CommentProcessingOutline" />
+                                        </Button>
+                                        <TextBlock
+                                            Width="30" Margin="-15,8,0,8" FontSize="10"
+                                            Foreground="Yellow"
+                                            Text="{Binding Comment}" />
+                                    </StackPanel>
                                     <Button
-                                        x:Name="btnMember" Width="45" Height="20"
-                                        Margin="0,0,5,0" HorizontalAlignment="Left"
+                                        Width="45" Height="20" Margin="0,0,5,0"
+                                        HorizontalAlignment="Left"
                                         Background="{x:Null}"
                                         BorderBrush="{x:Null}"
                                         Command="{Binding DataContext.DownloadOneCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                         CommandParameter="{Binding}">
-                                        <md:PackIcon Foreground="Purple" Kind="Download" />
+                                        <md:PackIcon Kind="Download" />
                                     </Button>
                                 </StackPanel>
                             </Grid>
@@ -116,6 +127,55 @@
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
         </ScrollViewer>
+        <md:DialogHost
+            x:Name="dg" Grid.Row="1" MaxWidth="800"
+            CloseOnClickAway="True"
+            IsOpen="{Binding IsOpen}">
+            <md:DialogHost.DialogContent>
+
+                <DataGrid
+                    x:Name="commentScrollViewer" Height="350" Margin="10"
+                    AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False"
+                    CanUserReorderColumns="False" IsReadOnly="True"
+                    ItemsSource="{Binding CommentItems}"
+                    ScrollViewer.VerticalScrollBarVisibility="Auto">
+
+                    <DataGrid.Columns>
+                        <DataGridTextColumn
+                            MinWidth="300" MaxWidth="450"
+                            Binding="{Binding Text}"
+                            ClipboardContentBinding="{x:Null}"
+                            Header="内容" />
+
+                        <DataGridTextColumn
+                            Width="100"
+                            Binding="{Binding DiggCount}"
+                            ClipboardContentBinding="{x:Null}"
+                            Header="点赞" />
+
+                        <DataGridTextColumn
+                            Width="160"
+                            Binding="{Binding NickName}"
+                            ClipboardContentBinding="{x:Null}"
+                            Header="用户昵称" />
+
+                        <DataGridTextColumn
+                            Width="160"
+                            Binding="{Binding CreateTime}"
+                            ClipboardContentBinding="{x:Null}"
+                            Header="发布时间" />
+
+                    </DataGrid.Columns>
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="ScrollChanged">
+                            <i:InvokeCommandAction Command="{Binding CommentDataGridScrollToBottomCommand}" CommandParameter="{Binding ElementName=commentScrollViewer}" />
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                </DataGrid>
+
+
+            </md:DialogHost.DialogContent>
+        </md:DialogHost>
     </Grid>
 
 

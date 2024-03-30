@@ -7,5 +7,6 @@ namespace DouYin.DownLoader.Services
         Task<DouYinAwemeDetailApiModel> GetAwemeDetailAsync(string url);
         Task<DouYinAwemListApiModel> GetAuthorVideos(string userId, long max_cursor);
         Task DownLoadVideoAsync(VideoItem video);
+        Task<DouYinCommentListApiModel> GetAwemeCommentList(string awemeId, long max_cursor = 0);
     }
 }

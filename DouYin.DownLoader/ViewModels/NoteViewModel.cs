@@ -13,16 +13,24 @@ namespace DouYin.DownLoader.ViewModels
     {
         private string? _userId;
         private long _maxCursor = 0;
-        private int hasMore = 1;
+        private long _commentMaxCursor = 0;
+        private int _hasMore = 1;
+        private int _commenthasMore = 1;
+        private VideoItem _currenVideo;
         private readonly IDouYinDownlaodService _douYinDownlaodService;
         [ObservableProperty]
         private string _url = "https://www.douyin.com/user/MS4wLjABAAAAyxCER8pqCDPMQN1DqoyaURTcR1lovESyiyZR6dYOaK9bdSR4X7mQQ8R7NRhZ4Lbp?vid=7344231935977327882";
         [ObservableProperty]
         private ICollection<VideoItem> _videoItems;
+        [ObservableProperty]
+        private bool _isOpen = false;
+        [ObservableProperty]
+        private ICollection<CommentItem> _commentItems;
 
         public NoteViewModel(IDouYinDownlaodService douYinDownlaodService)
         {
             VideoItems = new List<VideoItem>();
+            CommentItems = new List<CommentItem>();
             _douYinDownlaodService = douYinDownlaodService;
         }
 
@@ -51,7 +59,7 @@ namespace DouYin.DownLoader.ViewModels
             ScrollViewer scrollViewer = (parameter as ScrollViewer)!;
             if (scrollViewer!.VerticalOffset == scrollViewer.ScrollableHeight)
             {
-                if (hasMore == 1)
+                if (_hasMore == 1)
                     await GetAwemeList();
                 else
                     WeakReferenceMessenger.Default.Send(new NotifyMessage("已经获取到全部数据"));
@@ -61,8 +69,65 @@ namespace DouYin.DownLoader.ViewModels
         [RelayCommand]
         private async Task DownloadOne(VideoItem video)
         {
+
             await _douYinDownlaodService.DownLoadVideoAsync(video);
             await Task.Delay(500);
+            await Task.CompletedTask;
+        }
+        [RelayCommand]
+        private async Task ShowComment(VideoItem video)
+        {
+            _currenVideo = video;
+            IsOpen = true;
+            var result = await _douYinDownlaodService.GetAwemeCommentList(video.AwemeId!);
+            if (result.status_code != 0)
+            {
+                WeakReferenceMessenger.Default.Send(new NotifyMessage("获取数据异常"));
+            }
+            _commentMaxCursor = result.cursor;
+            CommentItems = result.comments!
+                .Where(x => x.content_type != 2)
+                .Select(x => new CommentItem
+                {
+                    Text = x.text,
+                    DiggCount = x.digg_count,
+                    NickName = x.user.nickname,
+                    CreateTime = DateTimeOffset.FromUnixTimeSeconds(x.create_time).DateTime
+                }).OrderByDescending(x => x.DiggCount)
+                .ToList();
+        }
+        [RelayCommand]
+        private async Task CommentDataGridScrollToBottom(object parameter)
+        {
+            ScrollViewer scrollViewer = (parameter as ScrollViewer)!;
+            if (scrollViewer.ScrollableHeight!=0&&scrollViewer!.VerticalOffset == scrollViewer.ScrollableHeight)
+            {
+                if (_commenthasMore == 0)
+                {
+                    WeakReferenceMessenger.Default.Send(new NotifyMessage("已经获取到全部数据"));
+                    return;
+                }
+                var result = await _douYinDownlaodService.GetAwemeCommentList(_currenVideo.AwemeId!);
+                if (result.status_code != 0)
+                {
+                    WeakReferenceMessenger.Default.Send(new NotifyMessage("获取数据异常"));
+                }
+                _commentMaxCursor = result.cursor;
+
+                var currentComments = result.comments!
+                .Where(x => x.content_type != 2)
+                .Select(x => new CommentItem
+                {
+                    Text = x.text,
+                    DiggCount = x.digg_count,
+                    NickName = x.user.nickname,
+                    CreateTime = DateTimeOffset.FromUnixTimeSeconds(x.create_time).DateTime
+                }).OrderByDescending(x => x.DiggCount)
+                .ToList();
+                CommentItems = CommentItems.Concat(currentComments).ToList();
+
+
+            }
             await Task.CompletedTask;
         }
         private async Task GetAwemeList()
@@ -74,7 +139,7 @@ namespace DouYin.DownLoader.ViewModels
                 WeakReferenceMessenger.Default.Send(new NotifyMessage("获取数据异常"));
             }
             _maxCursor = result.max_cursor;
-            hasMore = result.has_more;
+            _hasMore = result.has_more;
             var videos = result.aweme_list!.Select(x => new VideoItem
             {
                 AwemeType = x.aweme_type,

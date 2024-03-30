@@ -15,7 +15,7 @@ namespace DouYin.DownLoader.Services
     public class DouYinDownlaodService : IDouYinDownlaodService
     {
         private HttpClient _client;
-        private readonly string apiUrl = "https://www.douyin.com/aweme/v1/web/aweme/detail/?aweme_id={0}&aid=1128&version_name=23.5.0&device_platform=android&os_version=2333";
+
         public DouYinDownlaodService(IHttpClientFactory httpClientFactory)
         {
             _client = httpClientFactory.CreateClient(Constant.DOU_YING);
@@ -30,7 +30,7 @@ namespace DouYin.DownLoader.Services
             _client.DefaultRequestHeaders.Add("user-agent", Constant.UserAgent);
             _client.DefaultRequestHeaders.Add("referer", "https://www.douyin.com/search/%E7%83%AD%E9%97%A8?publish_time=0&sort_type=0&source=switch_tab&type=video");
             var ms = GetMsToken();
-            _client.DefaultRequestHeaders.Add("cookie", string.Format(Constant.Cookie, ms));
+            _client.DefaultRequestHeaders.Add("cookie", string.Format(Constant.Cookie!, ms));
         }
         public async Task<DouYinAwemeDetailApiModel> GetAwemeDetailAsync(string url)
         {
@@ -46,7 +46,12 @@ namespace DouYin.DownLoader.Services
             var awemeList = await _client.GetFromJsonAsync<DouYinAwemListApiModel>(url);
             return awemeList!;
         }
-
+        public async Task<DouYinCommentListApiModel> GetAwemeCommentList(string awemeId,long max_cursor=0) 
+        {
+            var url = await GenerateRequestParams(string.Format(Constant.AwemeCommenListtUrl, awemeId, max_cursor), Constant.UserAgent);
+            var awemeCommentList = await _client.GetFromJsonAsync<DouYinCommentListApiModel>(url);
+            return awemeCommentList!;
+        }
         public async Task DownLoadVideoAsync(VideoItem video)
         {
             var directory = $"{video.NikName}_{video.UId}\\";
