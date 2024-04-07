@@ -17,7 +17,7 @@
 
     <md:DialogHost DialogTheme="Inherit"
                            Identifier="RootDialog"
-                           SnackbarMessageQueue="{Binding ElementName=MainSnackbar, Path=MessageQueue}">
+                          >
 
         <md:DrawerHost IsLeftDrawerOpen="{Binding ElementName=MenuToggleButton, Path=IsChecked}">
             <md:DrawerHost.LeftDrawerContent>
@@ -55,11 +55,7 @@
                                 DockPanel.Dock="Top"
                                 Mode="PrimaryMid"
                                 MouseLeftButtonDown="ColorZone_MouseLeftButtonDown">
-                    <i:Interaction.Triggers>
-                        <i:EventTrigger EventName="MouseLeftButtonDown">
-                            <i:InvokeCommandAction Command="{Binding MoveCommand}" />
-                        </i:EventTrigger>
-                    </i:Interaction.Triggers>
+                   
                     <DockPanel LastChildFill="True">
                         <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
                             <Image Height="60" Width="60" Source="/avator.jpg">

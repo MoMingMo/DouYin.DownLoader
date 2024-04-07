@@ -14,22 +14,22 @@
         /// <summary>
         /// 收藏数
         /// </summary>
-        public string Collect => Math.Ceiling(CollectCount / 1000.00) + "K";
+        public string Collect => (CollectCount / 1000.00).ToString("f2") + "K";
         /// <summary>
         /// 评论数
         /// </summary>
         public double CommentCount { get; set; }
-        public string Comment=> Math.Ceiling(CommentCount / 1000.00) + "K";
+        public string Comment=> (CommentCount / 1000.00).ToString("f2") + "K";
         /// <summary>
         /// 点赞数据
         /// </summary>
         public double DiggCount { get; set; }
-        public string Digg => Math.Ceiling((DiggCount / 1000.00)) + "K";
+        public string Digg => ((DiggCount / 1000.00)).ToString("f2") + "K";
         /// <summary>
         /// 分享数
         /// </summary>
         public double ShareCount { get; set; }
-        public string Share => Math.Ceiling(ShareCount / 1000.00) + "K";
+        public string Share => (ShareCount / 1000.00).ToString("f2") + "K";
 
         public string? VideoTag { get; set; }
         /// <summary>

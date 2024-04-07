@@ -6,6 +6,8 @@ using DouYin.DownLoader.Common.Models;
 using DouYin.DownLoader.Services;
 using CommunityToolkit.Mvvm.Messaging;
 using DouYin.DownLoader.Common;
+using MiniExcelLibs;
+using System.IO;
 
 namespace DouYin.DownLoader.ViewModels
 {
@@ -19,18 +21,18 @@ namespace DouYin.DownLoader.ViewModels
         private VideoItem _currenVideo;
         private readonly IDouYinDownlaodService _douYinDownlaodService;
         [ObservableProperty]
-        private string _url = "https://www.douyin.com/user/MS4wLjABAAAAyxCER8pqCDPMQN1DqoyaURTcR1lovESyiyZR6dYOaK9bdSR4X7mQQ8R7NRhZ4Lbp?vid=7344231935977327882";
+        private string _url = "https://www.douyin.com/user/MS4wLjABAAAA4M7BBMvfTzE-ijnMRqTV3tWNMy8mGiRlF-iqEgnQ3VlIk33Yc79bgjbkv4BrDbnF?vid=7353439971585346867";
         [ObservableProperty]
         private ICollection<VideoItem> _videoItems;
         [ObservableProperty]
         private bool _isOpen = false;
         [ObservableProperty]
-        private ICollection<CommentItem> _commentItems;
+        private CommentList _commentList;
 
         public NoteViewModel(IDouYinDownlaodService douYinDownlaodService)
         {
             VideoItems = new List<VideoItem>();
-            CommentItems = new List<CommentItem>();
+
             _douYinDownlaodService = douYinDownlaodService;
         }
 
@@ -84,8 +86,9 @@ namespace DouYin.DownLoader.ViewModels
             {
                 WeakReferenceMessenger.Default.Send(new NotifyMessage("获取数据异常"));
             }
+            _hasMore = result.has_more;
             _commentMaxCursor = result.cursor;
-            CommentItems = result.comments!
+            var comments = result.comments!
                 .Where(x => x.content_type != 2)
                 .Select(x => new CommentItem
                 {
@@ -95,40 +98,135 @@ namespace DouYin.DownLoader.ViewModels
                     CreateTime = DateTimeOffset.FromUnixTimeSeconds(x.create_time).DateTime
                 }).OrderByDescending(x => x.DiggCount)
                 .ToList();
+            CommentList = new CommentList
+            {
+                CommentItems = comments,
+                ShowLastPage = false,
+                ShowNextPage = _hasMore == 1
+            };
+        }
+        //[RelayCommand]
+        //private async Task CommentDataGridScrollToBottom(object parameter)
+        //{
+        //    ScrollViewer scrollViewer = (parameter as ScrollViewer)!;
+        //    if (scrollViewer.ScrollableHeight != 0 && scrollViewer!.VerticalOffset == scrollViewer.ScrollableHeight)
+        //    {
+        //        if (_commenthasMore == 0)
+        //        {
+        //            WeakReferenceMessenger.Default.Send(new NotifyMessage("已经获取到全部数据"));
+        //            return;
+        //        }
+        //        var result = await _douYinDownlaodService.GetAwemeCommentList(_currenVideo.AwemeId!);
+        //        if (result.status_code != 0)
+        //        {
+        //            WeakReferenceMessenger.Default.Send(new NotifyMessage("获取数据异常"));
+        //        }
+        //        _commentMaxCursor = result.cursor;
+
+        //        var currentComments = result.comments!
+        //        .Where(x => x.content_type != 2)
+        //        .Select(x => new CommentItem
+        //        {
+        //            Text = x.text,
+        //            DiggCount = x.digg_count,
+        //            NickName = x.user.nickname,
+        //            CreateTime = DateTimeOffset.FromUnixTimeSeconds(x.create_time).DateTime
+        //        }).OrderByDescending(x => x.DiggCount)
+        //        .ToList();
+        //        CommentItems = CommentItems.Concat(currentComments).ToList();
+
+
+        //    }
+        //    await Task.CompletedTask;
+        //}
+        [RelayCommand]
+        private async Task NextPage()
+        {
+            var result = await _douYinDownlaodService.GetAwemeCommentList(_currenVideo.AwemeId!, _commentMaxCursor);
+            if (result.status_code != 0)
+            {
+                WeakReferenceMessenger.Default.Send(new NotifyMessage("获取数据异常"));
+            }
+            _commentMaxCursor = result.cursor;
+            var comments = result.comments!
+                .Where(x => x.content_type != 2)
+                .Select(x => new CommentItem
+                {
+                    Text = x.text,
+                    DiggCount = x.digg_count,
+                    NickName = x.user.nickname,
+                    CreateTime = DateTimeOffset.FromUnixTimeSeconds(x.create_time).DateTime
+                }).OrderByDescending(x => x.DiggCount)
+                .ToList();
+            CommentList = new CommentList
+            {
+                CommentItems = comments,
+                ShowLastPage = _commentMaxCursor != 0,
+                ShowNextPage = _hasMore == 1
+            };
         }
         [RelayCommand]
-        private async Task CommentDataGridScrollToBottom(object parameter)
+        private async Task LastPage()
         {
-            ScrollViewer scrollViewer = (parameter as ScrollViewer)!;
-            if (scrollViewer.ScrollableHeight!=0&&scrollViewer!.VerticalOffset == scrollViewer.ScrollableHeight)
+            _commentMaxCursor = _commentMaxCursor - 20 < 0 ? 0 : _commentMaxCursor - 20;
+            var result = await _douYinDownlaodService.GetAwemeCommentList(_currenVideo.AwemeId!, _commentMaxCursor);
+            if (result.status_code != 0)
             {
-                if (_commenthasMore == 0)
+                WeakReferenceMessenger.Default.Send(new NotifyMessage("获取数据异常"));
+            }
+          
+            var comments = result.comments!
+                .Where(x => x.content_type != 2)
+                .Select(x => new CommentItem
                 {
-                    WeakReferenceMessenger.Default.Send(new NotifyMessage("已经获取到全部数据"));
-                    return;
-                }
-                var result = await _douYinDownlaodService.GetAwemeCommentList(_currenVideo.AwemeId!);
+                    Text = x.text,
+                    DiggCount = x.digg_count,
+                    NickName = x.user.nickname,
+                    CreateTime = DateTimeOffset.FromUnixTimeSeconds(x.create_time).DateTime
+                }).OrderByDescending(x => x.DiggCount)
+                .ToList();
+            CommentList = new CommentList
+            {
+                CommentItems = comments,
+                ShowLastPage = result.cursor-20>0,
+                ShowNextPage = _hasMore == 1
+            };
+            _commentMaxCursor = result.cursor;
+        }
+        [RelayCommand]
+        private async Task ExportComments()
+        {
+            WeakReferenceMessenger.Default.Send(new NotifyMessage("正在获取评论数据。。。",true));
+            int pageIndex = 0;
+            var allComments = new List<CommentItem>();
+            while (true) 
+            {
+                var result = await _douYinDownlaodService.GetAwemeCommentList(_currenVideo.AwemeId!, pageIndex);
                 if (result.status_code != 0)
                 {
                     WeakReferenceMessenger.Default.Send(new NotifyMessage("获取数据异常"));
                 }
-                _commentMaxCursor = result.cursor;
-
-                var currentComments = result.comments!
-                .Where(x => x.content_type != 2)
-                .Select(x => new CommentItem
-                {
-                    Text = x.text,
-                    DiggCount = x.digg_count,
-                    NickName = x.user.nickname,
-                    CreateTime = DateTimeOffset.FromUnixTimeSeconds(x.create_time).DateTime
-                }).OrderByDescending(x => x.DiggCount)
-                .ToList();
-                CommentItems = CommentItems.Concat(currentComments).ToList();
-
-
+                var comments = result.comments!
+                    .Where(x => x.content_type != 2)
+                    .Select(x => new CommentItem
+                    {
+                        Text = x.text,
+                        DiggCount = x.digg_count,
+                        NickName = x.user.nickname,
+                        CreateTime = DateTimeOffset.FromUnixTimeSeconds(x.create_time).DateTime
+                    }).OrderByDescending(x => x.DiggCount)
+                    .ToList();
+                allComments.AddRange(comments);
+                pageIndex = result.cursor;
+                if (result.has_more == 0)
+                    break;
+                await Task.Delay(1000);
             }
-            await Task.CompletedTask;
+            var directory = "excel\\";
+            if (!Directory.Exists(directory))
+                Directory.CreateDirectory(directory);
+            await MiniExcel.SaveAsAsync(directory + _currenVideo.AwemeId + ".xlsx", allComments);
+            WeakReferenceMessenger.Default.Send(new NotifyMessage($"保存成功：{AppDomain.CurrentDomain.BaseDirectory+ directory + _currenVideo.AwemeId}.xlsx", false));
         }
         private async Task GetAwemeList()
         {

@@ -11,8 +11,8 @@ namespace DouYin.DownLoader.Common.Models
     {
         public int status_code { get; set; }
         public IEnumerable<Comment>? comments { get; set; }
-        public long cursor { get; set; }
-        public long has_more { get; set; }
+        public int cursor { get; set; }
+        public int has_more { get; set; }
         public long reply_style { get; set; }
         public long total { get; set; }
       

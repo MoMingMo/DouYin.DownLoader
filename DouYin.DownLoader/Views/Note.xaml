@@ -131,48 +131,66 @@
             x:Name="dg" Grid.Row="1" MaxWidth="800"
             CloseOnClickAway="True"
             IsOpen="{Binding IsOpen}">
+
             <md:DialogHost.DialogContent>
 
-                <DataGrid
-                    x:Name="commentScrollViewer" Height="350" Margin="10"
-                    AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False"
-                    CanUserReorderColumns="False" IsReadOnly="True"
-                    ItemsSource="{Binding CommentItems}"
-                    ScrollViewer.VerticalScrollBarVisibility="Auto">
+                <DockPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <DataGrid
+                        x:Name="commentScrollViewer" Height="520" Margin="10"
+                        AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False"
+                        CanUserReorderColumns="False" DockPanel.Dock="Top" IsReadOnly="True"
+                        ItemsSource="{Binding CommentList.CommentItems}">
 
-                    <DataGrid.Columns>
-                        <DataGridTextColumn
-                            MinWidth="300" MaxWidth="450"
-                            Binding="{Binding Text}"
-                            ClipboardContentBinding="{x:Null}"
-                            Header="内容" />
+                        <DataGrid.Columns>
+                            <DataGridTextColumn
+                                MinWidth="300" MaxWidth="450"
+                                Binding="{Binding Text}"
+                                ClipboardContentBinding="{x:Null}"
+                                Header="内容" />
 
-                        <DataGridTextColumn
-                            Width="100"
-                            Binding="{Binding DiggCount}"
-                            ClipboardContentBinding="{x:Null}"
-                            Header="点赞" />
+                            <DataGridTextColumn
+                                Width="100"
+                                Binding="{Binding DiggCount}"
+                                ClipboardContentBinding="{x:Null}"
+                                Header="点赞" />
 
-                        <DataGridTextColumn
-                            Width="160"
-                            Binding="{Binding NickName}"
-                            ClipboardContentBinding="{x:Null}"
-                            Header="用户昵称" />
+                            <DataGridTextColumn
+                                Width="160"
+                                Binding="{Binding NickName}"
+                                ClipboardContentBinding="{x:Null}"
+                                Header="用户昵称" />
 
-                        <DataGridTextColumn
-                            Width="160"
-                            Binding="{Binding CreateTime}"
-                            ClipboardContentBinding="{x:Null}"
-                            Header="发布时间" />
+                            <DataGridTextColumn
+                                Width="160"
+                                Binding="{Binding CreateTime}"
+                                ClipboardContentBinding="{x:Null}"
+                                Header="发布时间" />
 
-                    </DataGrid.Columns>
-                    <i:Interaction.Triggers>
-                        <i:EventTrigger EventName="ScrollChanged">
-                            <i:InvokeCommandAction Command="{Binding CommentDataGridScrollToBottomCommand}" CommandParameter="{Binding ElementName=commentScrollViewer}" />
-                        </i:EventTrigger>
-                    </i:Interaction.Triggers>
-                </DataGrid>
-
+                        </DataGrid.Columns>
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="ScrollChanged">
+                                <i:InvokeCommandAction Command="{Binding CommentDataGridScrollToBottomCommand}" CommandParameter="{Binding ElementName=commentScrollViewer}" />
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+                    </DataGrid>
+                    <DockPanel
+                        HorizontalAlignment="Center" DockPanel.Dock="Bottom" LastChildFill="False">
+                        <Button
+                            Margin="10"
+                            Command="{Binding LastPageCommand}"
+                            Content="上一页"
+                            IsEnabled="{Binding CommentList.ShowLastPage, Mode=TwoWay}" />
+                        <Button
+                            Margin="10"
+                            Command="{Binding NextPageCommand}"
+                            Content="下一页"
+                            IsEnabled="{Binding CommentList.ShowNextPage, Mode=TwoWay}" />
+                        <Button
+                            Margin="10"
+                            Command="{Binding ExportCommentsCommand}"
+                            Content="导出评论" />
+                    </DockPanel>
+                </DockPanel>
 
             </md:DialogHost.DialogContent>
         </md:DialogHost>
