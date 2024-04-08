@@ -16,7 +16,6 @@ namespace DouYin.DownLoader.Common.Models
     public class CommentList 
     {
         public ICollection<CommentItem>? CommentItems { get; set; }
-        public bool ShowLastPage { get; set; } = true;
-        public bool ShowNextPage { get; set; } = true;
+        public bool HasMore { get; set; } = true;
     }
 }

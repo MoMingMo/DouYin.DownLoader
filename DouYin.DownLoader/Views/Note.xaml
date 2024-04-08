@@ -50,7 +50,7 @@
 
                         <md:Card Margin="5,5,0,0">
                             <Grid
-                                Width="230" MinHeight="280" MaxHeight="300">
+                                Width="260" MinHeight="280" MaxHeight="300">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="50" />
                                     <RowDefinition Height="*" />
@@ -60,7 +60,7 @@
                                 <TextBlock
                                     Width="200" Margin="10" HorizontalAlignment="Left"
                                     Panel.ZIndex="1" FontSize="10" FontWeight="Bold"
-                                    Foreground="Yellow"
+                                    Foreground="Red"
                                     Text="{Binding Title}" />
                                 <Border
                                     Name="tag" Width="40" Height="20"
@@ -73,26 +73,26 @@
                                 </Border>
                                 <Image
                                     x:Name="image" Grid.Row="0" Grid.RowSpan="4"
-                                    MinWidth="200" MinHeight="250" Margin="5"
+                                    MinWidth="220" MinHeight="260" Margin="5"
                                     Source="{Binding VideoCover}"
                                     Stretch="Fill" />
                                 <StackPanel
-                                    Grid.Row="3" Width="230" Margin="8"
+                                    Grid.Row="3" Width="250" Margin="5"
                                     Orientation="Horizontal">
                                     <md:PackIcon Margin="5" Kind="Heart" />
                                     <TextBlock
-                                        Width="30" Margin="0,8" FontSize="10"
-                                        Foreground="Yellow"
+                                        Width="40" Margin="0,8" FontSize="10"
+                                        Foreground="Red"
                                         Text="{Binding Digg}" />
 
-                                    <md:PackIcon Margin="5" Kind="Star" />
+                                    <md:PackIcon Margin="3" Kind="Star" />
                                     <TextBlock
-                                        Width="30" Margin="0,8" FontSize="10"
-                                        Foreground="Yellow"
+                                        Width="40" Margin="0,8" FontSize="10"
+                                        Foreground="Red"
                                         Text="{Binding Collect}" />
                                     <StackPanel Background="{x:Null}" Orientation="Horizontal">
                                         <Button
-                                            Width="50" Height="20" Margin="-20,0,5,0"
+                                            Width="50" Height="20" Margin="-10,0,5,0"
                                             HorizontalAlignment="Left"
                                             Background="{x:Null}"
                                             BorderBrush="{x:Null}"
@@ -102,7 +102,7 @@
                                         </Button>
                                         <TextBlock
                                             Width="30" Margin="-15,8,0,8" FontSize="10"
-                                            Foreground="Yellow"
+                                            Foreground="Red"
                                             Text="{Binding Comment}" />
                                     </StackPanel>
                                     <Button
@@ -139,7 +139,8 @@
                         x:Name="commentScrollViewer" Height="520" Margin="10"
                         AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False"
                         CanUserReorderColumns="False" DockPanel.Dock="Top" IsReadOnly="True"
-                        ItemsSource="{Binding CommentList.CommentItems}">
+                        ItemsSource="{Binding CommentList.CommentItems, Mode=TwoWay}"
+                        ScrollViewer.VerticalScrollBarVisibility="Auto">
 
                         <DataGrid.Columns>
                             <DataGridTextColumn
@@ -167,24 +168,15 @@
                                 Header="发布时间" />
 
                         </DataGrid.Columns>
-                        <i:Interaction.Triggers>
-                            <i:EventTrigger EventName="ScrollChanged">
-                                <i:InvokeCommandAction Command="{Binding CommentDataGridScrollToBottomCommand}" CommandParameter="{Binding ElementName=commentScrollViewer}" />
-                            </i:EventTrigger>
-                        </i:Interaction.Triggers>
                     </DataGrid>
                     <DockPanel
                         HorizontalAlignment="Center" DockPanel.Dock="Bottom" LastChildFill="False">
-                        <Button
-                            Margin="10"
-                            Command="{Binding LastPageCommand}"
-                            Content="上一页"
-                            IsEnabled="{Binding CommentList.ShowLastPage, Mode=TwoWay}" />
+
                         <Button
                             Margin="10"
                             Command="{Binding NextPageCommand}"
-                            Content="下一页"
-                            IsEnabled="{Binding CommentList.ShowNextPage, Mode=TwoWay}" />
+                            Content="加载更多"
+                            IsEnabled="{Binding CommentList.HasMore, Mode=TwoWay}" />
                         <Button
                             Margin="10"
                             Command="{Binding ExportCommentsCommand}"

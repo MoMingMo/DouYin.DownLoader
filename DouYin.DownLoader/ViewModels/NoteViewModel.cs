@@ -101,44 +101,10 @@ namespace DouYin.DownLoader.ViewModels
             CommentList = new CommentList
             {
                 CommentItems = comments,
-                ShowLastPage = false,
-                ShowNextPage = _hasMore == 1
+                HasMore = _hasMore == 1
             };
         }
-        //[RelayCommand]
-        //private async Task CommentDataGridScrollToBottom(object parameter)
-        //{
-        //    ScrollViewer scrollViewer = (parameter as ScrollViewer)!;
-        //    if (scrollViewer.ScrollableHeight != 0 && scrollViewer!.VerticalOffset == scrollViewer.ScrollableHeight)
-        //    {
-        //        if (_commenthasMore == 0)
-        //        {
-        //            WeakReferenceMessenger.Default.Send(new NotifyMessage("已经获取到全部数据"));
-        //            return;
-        //        }
-        //        var result = await _douYinDownlaodService.GetAwemeCommentList(_currenVideo.AwemeId!);
-        //        if (result.status_code != 0)
-        //        {
-        //            WeakReferenceMessenger.Default.Send(new NotifyMessage("获取数据异常"));
-        //        }
-        //        _commentMaxCursor = result.cursor;
-
-        //        var currentComments = result.comments!
-        //        .Where(x => x.content_type != 2)
-        //        .Select(x => new CommentItem
-        //        {
-        //            Text = x.text,
-        //            DiggCount = x.digg_count,
-        //            NickName = x.user.nickname,
-        //            CreateTime = DateTimeOffset.FromUnixTimeSeconds(x.create_time).DateTime
-        //        }).OrderByDescending(x => x.DiggCount)
-        //        .ToList();
-        //        CommentItems = CommentItems.Concat(currentComments).ToList();
-
-
-        //    }
-        //    await Task.CompletedTask;
-        //}
+       
         [RelayCommand]
         private async Task NextPage()
         {
@@ -147,8 +113,10 @@ namespace DouYin.DownLoader.ViewModels
             {
                 WeakReferenceMessenger.Default.Send(new NotifyMessage("获取数据异常"));
             }
+            if (result.comments is null) return;
             _commentMaxCursor = result.cursor;
-            var comments = result.comments!
+            await Console.Out.WriteLineAsync("_commentMaxCursor"+ result.cursor);
+            var comments = result.comments?
                 .Where(x => x.content_type != 2)
                 .Select(x => new CommentItem
                 {
@@ -158,75 +126,24 @@ namespace DouYin.DownLoader.ViewModels
                     CreateTime = DateTimeOffset.FromUnixTimeSeconds(x.create_time).DateTime
                 }).OrderByDescending(x => x.DiggCount)
                 .ToList();
+            var data = CommentList.CommentItems;
             CommentList = new CommentList
             {
-                CommentItems = comments,
-                ShowLastPage = _commentMaxCursor != 0,
-                ShowNextPage = _hasMore == 1
+                CommentItems=data!.Concat(comments!).OrderByDescending(x=>x.DiggCount).ToList(),
+                HasMore=result.has_more==1
             };
         }
-        [RelayCommand]
-        private async Task LastPage()
-        {
-            _commentMaxCursor = _commentMaxCursor - 20 < 0 ? 0 : _commentMaxCursor - 20;
-            var result = await _douYinDownlaodService.GetAwemeCommentList(_currenVideo.AwemeId!, _commentMaxCursor);
-            if (result.status_code != 0)
-            {
-                WeakReferenceMessenger.Default.Send(new NotifyMessage("获取数据异常"));
-            }
-          
-            var comments = result.comments!
-                .Where(x => x.content_type != 2)
-                .Select(x => new CommentItem
-                {
-                    Text = x.text,
-                    DiggCount = x.digg_count,
-                    NickName = x.user.nickname,
-                    CreateTime = DateTimeOffset.FromUnixTimeSeconds(x.create_time).DateTime
-                }).OrderByDescending(x => x.DiggCount)
-                .ToList();
-            CommentList = new CommentList
-            {
-                CommentItems = comments,
-                ShowLastPage = result.cursor-20>0,
-                ShowNextPage = _hasMore == 1
-            };
-            _commentMaxCursor = result.cursor;
-        }
+
         [RelayCommand]
         private async Task ExportComments()
         {
-            WeakReferenceMessenger.Default.Send(new NotifyMessage("正在获取评论数据。。。",true));
-            int pageIndex = 0;
-            var allComments = new List<CommentItem>();
-            while (true) 
-            {
-                var result = await _douYinDownlaodService.GetAwemeCommentList(_currenVideo.AwemeId!, pageIndex);
-                if (result.status_code != 0)
-                {
-                    WeakReferenceMessenger.Default.Send(new NotifyMessage("获取数据异常"));
-                }
-                var comments = result.comments!
-                    .Where(x => x.content_type != 2)
-                    .Select(x => new CommentItem
-                    {
-                        Text = x.text,
-                        DiggCount = x.digg_count,
-                        NickName = x.user.nickname,
-                        CreateTime = DateTimeOffset.FromUnixTimeSeconds(x.create_time).DateTime
-                    }).OrderByDescending(x => x.DiggCount)
-                    .ToList();
-                allComments.AddRange(comments);
-                pageIndex = result.cursor;
-                if (result.has_more == 0)
-                    break;
-                await Task.Delay(1000);
-            }
+
+            var fileName = _currenVideo.AwemeId + "-" + DateTime.Now.ToString("yyyyMMddHHmmss") + ".xlsx";
             var directory = "excel\\";
             if (!Directory.Exists(directory))
                 Directory.CreateDirectory(directory);
-            await MiniExcel.SaveAsAsync(directory + _currenVideo.AwemeId + ".xlsx", allComments);
-            WeakReferenceMessenger.Default.Send(new NotifyMessage($"保存成功：{AppDomain.CurrentDomain.BaseDirectory+ directory + _currenVideo.AwemeId}.xlsx", false));
+            await MiniExcel.SaveAsAsync(directory + fileName, CommentList.CommentItems);
+            WeakReferenceMessenger.Default.Send(new NotifyMessage($"保存成功：{AppDomain.CurrentDomain.BaseDirectory+ directory + fileName}", false));
         }
         private async Task GetAwemeList()
         {
