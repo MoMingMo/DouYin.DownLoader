@@ -33,7 +33,7 @@ namespace DouYin.DownLoader.Services
         }
         public async Task<DouYinAwemeDetailApiModel> GetAwemeDetailAsync(string url)
         {
-            var modal_id =await ExtractModalId(url);
+            var modal_id = await ExtractModalId(url);
             url = string.Format(Constant.AwemeDetailUrl, modal_id);
             var awemeDetail = await _client.GetFromJsonAsync<DouYinAwemeDetailApiModel>(url);
             return awemeDetail!;
@@ -50,6 +50,12 @@ namespace DouYin.DownLoader.Services
             var url = await GenerateRequestParams(string.Format(Constant.AwemeCommenListtUrl, awemeId, max_cursor), Constant.UserAgent);
             var awemeCommentList = await _client.GetFromJsonAsync<DouYinCommentListApiModel>(url);
             return awemeCommentList!;
+        }
+        public async Task<DouYinAwemeMixApiModel> GetYinAwemeMixList(string userId, long max_cursor = 0)
+        {
+            var url = await GenerateRequestParams(string.Format(Constant.AwemeMixListUrl, userId, max_cursor), Constant.UserAgent);
+            var awemeMixList = await _client.GetFromJsonAsync<DouYinAwemeMixApiModel>(url);
+            return awemeMixList!;
         }
         public async Task DownLoadVideoAsync(VideoItem video)
         {
@@ -193,6 +199,7 @@ namespace DouYin.DownLoader.Services
                 throw new Exception("url地址异常");
             }
         }
+
 
     }
 }

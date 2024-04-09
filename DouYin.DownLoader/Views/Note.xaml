@@ -9,6 +9,7 @@
     <Grid Margin="0,10">
         <Grid.RowDefinitions>
             <RowDefinition Height="auto" />
+            <RowDefinition Height="auto" />
             <RowDefinition />
         </Grid.RowDefinitions>
         <DockPanel
@@ -17,19 +18,75 @@
                 Width="60" Margin="10,0" VerticalAlignment="Center"
                 Text="主页链接" />
             <TextBox
-                MinWidth="450" MaxWidth="720" Margin="10,0"
-                md:HintAssist.Hint="请输入地址,抖音地址栏中的地址"
+                Width="320" Margin="10,0" md:HintAssist.Hint="请输入地址,抖音地址栏中的地址"
                 Text="{Binding Url}" />
             <Button
                 Width="100" Margin="10,0" VerticalContentAlignment="Center"
                 Command="{Binding GetDataCommand}"
                 Content="获取数据" />
             <Button
+                Width="100" Margin="10,0" VerticalContentAlignment="Center"
+                Command="{Binding GetMixCommand}"
+                Content="合集" />
+            <Button
                 Width="120" Margin="10,0" VerticalContentAlignment="Center"
                 Command="{Binding DownloadCommand}"
                 Content="下载当前数据" />
         </DockPanel>
-        <ScrollViewer x:Name="videoScrollViewer" Grid.Row="1">
+        <ScrollViewer
+            x:Name="cpllectionScrollViewer" Grid.Row="1" Margin="0,5"
+            HorizontalScrollBarVisibility="Auto">
+            <ItemsControl ItemsSource="{Binding MixItems}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel Orientation="Horizontal" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <md:Card Margin="5">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition />
+                                    <RowDefinition />
+                                    <RowDefinition />
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition />
+                                    <ColumnDefinition />
+                                </Grid.ColumnDefinitions>
+                                <Image
+                                    Grid.RowSpan="3" Width="90" Height="90"
+                                    Margin="10"
+                                    Source="{Binding MixCorver}" />
+                                <TextBlock
+                                    Grid.Row="0" Grid.Column="1" MinWidth="150"
+                                    Margin="10"
+                                    Text="{Binding MixTitle}"
+                                    TextAlignment="Left" />
+                                <TextBlock
+                                    Grid.Row="1" Grid.Column="1" MinWidth="150"
+                                    Margin="10"
+                                    Text="{Binding MixPlay}"
+                                    TextAlignment="Left" />
+                                <TextBlock
+                                    Grid.Row="2" Grid.Column="1" MinWidth="150"
+                                    Text="{Binding Chapter}"
+                                    TextAlignment="Left" />
+                                <Button
+                                    Grid.Row="2" Grid.Column="1" Width="45"
+                                    Height="20" Margin="0,0,5,10" HorizontalAlignment="Right"
+                                    Background="{x:Null}"
+                                    BorderBrush="{x:Null}">
+                                    <md:PackIcon Kind="Download" />
+                                </Button>
+                            </Grid>
+                        </md:Card>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+        <ScrollViewer x:Name="videoScrollViewer" Grid.Row="2">
             <i:Interaction.Triggers>
                 <i:EventTrigger EventName="ScrollChanged">
                     <i:InvokeCommandAction Command="{Binding ScrollToBottomCommand}" CommandParameter="{Binding ElementName=videoScrollViewer}" />

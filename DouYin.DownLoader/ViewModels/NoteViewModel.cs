@@ -28,14 +28,34 @@ namespace DouYin.DownLoader.ViewModels
         private bool _isOpen = false;
         [ObservableProperty]
         private CommentList _commentList;
-
+        [ObservableProperty]
+        private ICollection<MixItem> _mixItems;
         public NoteViewModel(IDouYinDownlaodService douYinDownlaodService)
         {
             VideoItems = new List<VideoItem>();
 
             _douYinDownlaodService = douYinDownlaodService;
         }
-
+        [RelayCommand]
+        private async Task GetMix()
+        {
+            ExtraUserId(Url);
+            _maxCursor = 0;
+            MixItems=new List<MixItem>();
+            var result = await _douYinDownlaodService.GetYinAwemeMixList(_userId!,0);
+            if (result.status_code != 0) 
+            {
+            }
+            MixItems = result.mix_infos.Select(x => new MixItem
+            {
+                MixId=x.mix_id,
+                MixCorver = x.cover_url.url_list[0],
+                PlayCount=x.statis.play_vv,
+                MixTitle=x.mix_name,
+                Chapter=$"更新至{x.statis.updated_to_episode}集"
+                
+            }).ToList();
+        }
         [RelayCommand]
         private async Task GetData()
         {
@@ -140,7 +160,7 @@ namespace DouYin.DownLoader.ViewModels
         {
 
             var fileName = _currenVideo.AwemeId + "-" + DateTime.Now.ToString("yyyyMMddHHmmss") + ".xlsx";
-            var directory = "excel\\";
+            var directory = Constant.FilePath ?? "" + "excel\\";
             if (!Directory.Exists(directory))
                 Directory.CreateDirectory(directory);
             await MiniExcel.SaveAsAsync(directory + fileName, CommentList.CommentItems);
