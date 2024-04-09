@@ -26,7 +26,6 @@ namespace DouYin.DownLoader.ViewModels
 
             try
             {
-
                 var awemeDetail = await _douYinDownlaodService.GetAwemeDetailAsync(Url);
                 if (awemeDetail.status_code != 0)
                 {

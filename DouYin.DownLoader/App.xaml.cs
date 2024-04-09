@@ -22,7 +22,7 @@ namespace DouYin.DownLoader
             .AddJsonFile("appsettings.json");
             var config = builder.Build();
             Constant.SetCookie(config["Cookie"]!);
-
+            Constant.SetFilePath(config["FilePath"]!);
             Ioc.Default.ConfigureServices(
                 new ServiceCollection()
 

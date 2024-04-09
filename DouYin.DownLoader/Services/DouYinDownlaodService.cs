@@ -8,7 +8,6 @@ using System.Text.RegularExpressions;
 using System.Web;
 using DouYin.DownLoader.Common;
 using DouYin.DownLoader.Common.Models;
-using System.Windows.Interop;
 
 namespace DouYin.DownLoader.Services
 {
@@ -34,7 +33,7 @@ namespace DouYin.DownLoader.Services
         }
         public async Task<DouYinAwemeDetailApiModel> GetAwemeDetailAsync(string url)
         {
-            var modal_id = ExtractModalId(url);
+            var modal_id =await ExtractModalId(url);
             url = string.Format(Constant.AwemeDetailUrl, modal_id);
             var awemeDetail = await _client.GetFromJsonAsync<DouYinAwemeDetailApiModel>(url);
             return awemeDetail!;
@@ -46,7 +45,7 @@ namespace DouYin.DownLoader.Services
             var awemeList = await _client.GetFromJsonAsync<DouYinAwemListApiModel>(url);
             return awemeList!;
         }
-        public async Task<DouYinCommentListApiModel> GetAwemeCommentList(string awemeId,long max_cursor=0) 
+        public async Task<DouYinCommentListApiModel> GetAwemeCommentList(string awemeId, long max_cursor = 0)
         {
             var url = await GenerateRequestParams(string.Format(Constant.AwemeCommenListtUrl, awemeId, max_cursor), Constant.UserAgent);
             var awemeCommentList = await _client.GetFromJsonAsync<DouYinCommentListApiModel>(url);
@@ -54,7 +53,7 @@ namespace DouYin.DownLoader.Services
         }
         public async Task DownLoadVideoAsync(VideoItem video)
         {
-            var directory = $"{video.NikName}_{video.UId}\\";
+            var directory = $"{Constant.FilePath ?? ""}{video.NikName}_{video.UId}\\";
             directory += video.AwemeType == 68 ? "images\\" : "";
             if (!Directory.Exists(directory))
             {
@@ -85,13 +84,13 @@ namespace DouYin.DownLoader.Services
                 }
                 if (video.AwemeType == 68 && video.Images is { Count: > 0 })
                 {
-                   
+
                     for (int i = 0; i < video.Images.Count; i++)
                     {
                         videoFileName = $"{directory}{video.AwemeId}" + "_{0}.png";
                         var url = video.Images[i];
-                      
-                        if (!File.Exists(string.Format(videoFileName,i)))
+
+                        if (!File.Exists(string.Format(videoFileName, i)))
                         {
                             using (HttpResponseMessage response = await _client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead))
                             {
@@ -105,13 +104,13 @@ namespace DouYin.DownLoader.Services
                                     }
                                 }
                             }
-                           
+
                         }
                     }
                     msg = $"下载完成{video.NikName}-{video.AwemeId}的图集";
                     WeakReferenceMessenger.Default.Send(new NotifyMessage(msg));
                 }
-                else 
+                else
                 {
                     if (!File.Exists(videoFileName))
                     {
@@ -132,14 +131,14 @@ namespace DouYin.DownLoader.Services
                     }
                 }
 
-               
+
 
             }
             catch (Exception)
             {
                 throw;
             }
-   
+
         }
         private async Task<string> GenerateRequestParams(string url, string userAgent)
         {
@@ -170,9 +169,19 @@ namespace DouYin.DownLoader.Services
         {
             return GenerateRandomString(107);
         }
-        private string ExtractModalId(string url)
+        private async Task<string> ExtractModalId(string url)
         {
-            string pattern = @"modal_id=(\d+)";
+            string pattern = @"/(\d+)\?";
+            if (url.Contains("v.douyin.com"))
+            {
+                var res = await _client.GetAsync(url);
+                url = res.RequestMessage!.RequestUri!.AbsoluteUri;
+            }
+            else
+            {
+                pattern = @"modal_id=(\d+)";
+            }
+
             Match match = Regex.Match(url, pattern);
 
             if (match.Success)

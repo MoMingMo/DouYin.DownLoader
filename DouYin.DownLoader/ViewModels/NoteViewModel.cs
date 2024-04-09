@@ -39,6 +39,7 @@ namespace DouYin.DownLoader.ViewModels
         [RelayCommand]
         private async Task GetData()
         {
+            _maxCursor = 0;
             VideoItems = new List<VideoItem>();
             ExtraUserId(Url);
             await GetAwemeList();
@@ -104,7 +105,7 @@ namespace DouYin.DownLoader.ViewModels
                 HasMore = _hasMore == 1
             };
         }
-       
+
         [RelayCommand]
         private async Task NextPage()
         {
@@ -115,7 +116,7 @@ namespace DouYin.DownLoader.ViewModels
             }
             if (result.comments is null) return;
             _commentMaxCursor = result.cursor;
-            await Console.Out.WriteLineAsync("_commentMaxCursor"+ result.cursor);
+            await Console.Out.WriteLineAsync("_commentMaxCursor" + result.cursor);
             var comments = result.comments?
                 .Where(x => x.content_type != 2)
                 .Select(x => new CommentItem
@@ -129,8 +130,8 @@ namespace DouYin.DownLoader.ViewModels
             var data = CommentList.CommentItems;
             CommentList = new CommentList
             {
-                CommentItems=data!.Concat(comments!).OrderByDescending(x=>x.DiggCount).ToList(),
-                HasMore=result.has_more==1
+                CommentItems = data!.Concat(comments!).OrderByDescending(x => x.DiggCount).ToList(),
+                HasMore = result.has_more == 1
             };
         }
 
@@ -143,7 +144,7 @@ namespace DouYin.DownLoader.ViewModels
             if (!Directory.Exists(directory))
                 Directory.CreateDirectory(directory);
             await MiniExcel.SaveAsAsync(directory + fileName, CommentList.CommentItems);
-            WeakReferenceMessenger.Default.Send(new NotifyMessage($"保存成功：{AppDomain.CurrentDomain.BaseDirectory+ directory + fileName}", false));
+            WeakReferenceMessenger.Default.Send(new NotifyMessage($"保存成功：{Constant.FilePath ?? AppDomain.CurrentDomain.BaseDirectory + directory + fileName}", false));
         }
         private async Task GetAwemeList()
         {
