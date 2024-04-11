@@ -39,28 +39,35 @@ namespace DouYin.DownLoader.Services
             return awemeDetail!;
 
         }
-        public async Task<DouYinAwemListApiModel> GetAuthorVideos(string userId, long max_cursor = 0)
+        public async Task<DouYinAwemListApiModel> GetAuthorVideosAsync(string userId, long max_cursor = 0)
         {
             var url = await GenerateRequestParams(string.Format(Constant.AwemeListUrl, userId, max_cursor), Constant.UserAgent);
             var awemeList = await _client.GetFromJsonAsync<DouYinAwemListApiModel>(url);
             return awemeList!;
         }
-        public async Task<DouYinCommentListApiModel> GetAwemeCommentList(string awemeId, long max_cursor = 0)
+        public async Task<DouYinCommentListApiModel> GetAwemeCommentListAsync(string awemeId, long max_cursor = 0)
         {
             var url = await GenerateRequestParams(string.Format(Constant.AwemeCommenListtUrl, awemeId, max_cursor), Constant.UserAgent);
             var awemeCommentList = await _client.GetFromJsonAsync<DouYinCommentListApiModel>(url);
             return awemeCommentList!;
         }
-        public async Task<DouYinAwemeMixApiModel> GetYinAwemeMixList(string userId, long max_cursor = 0)
+        public async Task<DouYinAwemeMixListApiModel> GetYinAwemeMixListAsync(string userId, long max_cursor = 0)
         {
             var url = await GenerateRequestParams(string.Format(Constant.AwemeMixListUrl, userId, max_cursor), Constant.UserAgent);
-            var awemeMixList = await _client.GetFromJsonAsync<DouYinAwemeMixApiModel>(url);
+            var awemeMixList = await _client.GetFromJsonAsync<DouYinAwemeMixListApiModel>(url);
             return awemeMixList!;
+        }
+        public async Task<DouYinAwemeMixApiModel> GetYinAwemeMixAwemesAsync(string mix_id, long max_cursor = 0)
+        {
+            var url = string.Format(Constant.AwemeMixUrl, mix_id, max_cursor);
+            var awemeMixAwmes = await _client.GetFromJsonAsync<DouYinAwemeMixApiModel>(url);
+            return awemeMixAwmes!;
         }
         public async Task DownLoadVideoAsync(VideoItem video)
         {
             var directory = $"{Constant.FilePath ?? ""}{video.NikName}_{video.UId}\\";
             directory += video.AwemeType == 68 ? "images\\" : "";
+            directory += string.IsNullOrEmpty(video.MixName) ? "" : video.MixName + "\\";
             if (!Directory.Exists(directory))
             {
                 Directory.CreateDirectory(directory);
@@ -200,6 +207,6 @@ namespace DouYin.DownLoader.Services
             }
         }
 
-
+        
     }
 }

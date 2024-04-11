@@ -32,11 +32,7 @@
         public string Share => (ShareCount / 1000.00).ToString("f2") + "K";
 
         public string? VideoTag { get; set; }
-        /// <summary>
-        /// 地址栏中的
-        /// MS4wLjABAAAAZD35Wpqy1uyKvLyV8pfQen_TxIDCREYM-jGwaL1YXI0
-        /// </summary>
-        public string? SecUid {  get; set; }
+
         /// <summary>
         /// 
         /// </summary>
@@ -47,5 +43,7 @@
         public int AwemeType { get; set; }
 
         public List<string>? Images { get; set; }
+
+        public string MixName { get; set; } = default!;
     }
 }

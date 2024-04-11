@@ -8,7 +8,7 @@ namespace DouYin.DownLoader.Common
         public static string AwemeDetailUrl = "https://www.douyin.com/aweme/v1/web/aweme/detail/?aweme_id={0}&aid=1128&version_name=23.5.0&device_platform=android&os_version=2333";
         public static string AwemeListUrl = "https://www.douyin.com/aweme/v1/web/aweme/post/?device_platform=webapp&aid=6383&channel=channel_pc_web&sec_user_id={0}&max_cursor={1}&count=20";
         public static string AwemeCommenListtUrl = "https://www.douyin.com/aweme/v1/web/comment/list/?aweme_id={0}&cursor={1}&count=15&cookie_enabled=true";
-        public static string AwemeMixCollectionsUrl = "https://www.douyin.com/aweme/v1/web/mix/listcollection/?device_platform=webapp&aid=6383&channel=channel_pc_web&mix_id={0}&max_cursor={1}&count=20";
+        public static string AwemeMixUrl = "https://www.douyin.com/aweme/v1/web/mix/aweme/?mix_id={0}&max_cursor={1}&count=20";
         public static string AwemeMixListUrl = "https://www.douyin.com/aweme/v1/web/mix/list/?device_platform=webapp&aid=6383&channel=channel_pc_web&version_name=29.1.0&sec_user_id={0}&max_cursor={1}&count=20";
         public static string UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36";
         public static string DOU_YING = "douying";

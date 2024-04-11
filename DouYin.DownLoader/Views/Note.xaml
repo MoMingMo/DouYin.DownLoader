@@ -35,7 +35,8 @@
         </DockPanel>
         <ScrollViewer
             x:Name="cpllectionScrollViewer" Grid.Row="1" Margin="0,5"
-            HorizontalScrollBarVisibility="Auto">
+            HorizontalScrollBarVisibility="Auto"
+            Visibility="{Binding IsMixShow}">
             <ItemsControl ItemsSource="{Binding MixItems}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
@@ -77,7 +78,10 @@
                                     Grid.Row="2" Grid.Column="1" Width="45"
                                     Height="20" Margin="0,0,5,10" HorizontalAlignment="Right"
                                     Background="{x:Null}"
-                                    BorderBrush="{x:Null}">
+                                    BorderBrush="{x:Null}"
+                                    Command="{Binding DataContext.DownloadMixCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                    CommandParameter="{Binding}">
+
                                     <md:PackIcon Kind="Download" />
                                 </Button>
                             </Grid>

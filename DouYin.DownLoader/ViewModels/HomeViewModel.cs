@@ -56,7 +56,6 @@ namespace DouYin.DownLoader.ViewModels
                     ShareCount = statistics.share_count,
                     DiggCount = statistics.digg_count,
                     VideoTag = string.Join(' ', tags),
-                    SecUid = author.sec_uid!,
                     UId = uid!,
                     AwemeId = aweme_id!,
                     AwemeType = aweme_type,

@@ -30,31 +30,72 @@ namespace DouYin.DownLoader.ViewModels
         private CommentList _commentList;
         [ObservableProperty]
         private ICollection<MixItem> _mixItems;
+        [ObservableProperty]
+        private bool _isMixShow;
         public NoteViewModel(IDouYinDownlaodService douYinDownlaodService)
         {
             VideoItems = new List<VideoItem>();
-
             _douYinDownlaodService = douYinDownlaodService;
         }
         [RelayCommand]
         private async Task GetMix()
         {
             ExtraUserId(Url);
-            _maxCursor = 0;
-            MixItems=new List<MixItem>();
-            var result = await _douYinDownlaodService.GetYinAwemeMixList(_userId!,0);
-            if (result.status_code != 0) 
+            MixItems = new List<MixItem>();
+            var result = await _douYinDownlaodService.GetYinAwemeMixListAsync(_userId!, 0);
+            if (result.status_code != 0)
             {
             }
             MixItems = result.mix_infos.Select(x => new MixItem
             {
-                MixId=x.mix_id,
+                MixId = x.mix_id,
                 MixCorver = x.cover_url.url_list[0],
-                PlayCount=x.statis.play_vv,
-                MixTitle=x.mix_name,
-                Chapter=$"更新至{x.statis.updated_to_episode}集"
-                
+                PlayCount = x.statis.play_vv,
+                MixTitle = x.mix_name,
+                Chapter = $"更新至{x.statis.updated_to_episode}集"
+
             }).ToList();
+            IsMixShow = MixItems.Any();
+        }
+        [RelayCommand]
+        private async Task DownloadMix(MixItem mixItem)
+        {
+            var result = await _douYinDownlaodService.GetYinAwemeMixAwemesAsync(mixItem.MixId, 0);
+            var videoItems = result.aweme_list.Select(x => new VideoItem
+            {
+                AwemeId = x.aweme_id,
+                AwemeType = x.aweme_type,
+                NikName = x.author.nickname,
+                UId = x.author.uid,
+                MixName = mixItem.MixTitle,
+                VideoCover = x.video!.cover!.url_list![0],
+                Video = x.video!.play_addr!.url_list![0],
+                Images = x.images?.Select(x => x.url_list[0])?.ToList(),
+
+            }).ToList();
+            while (result.has_more == 1)
+            {
+                result = await _douYinDownlaodService.GetYinAwemeMixAwemesAsync(mixItem.MixId, result.cursor);
+                var awemes = result.aweme_list.Select(x => new VideoItem
+                {
+                    AwemeId = x.aweme_id,
+                    AwemeType = x.aweme_type,
+                    NikName = x.author.nickname,
+                    UId = x.author.uid,
+                    VideoCover = x.video!.cover!.url_list![0],
+                    Video = x.video!.play_addr!.url_list![0],
+                    Images = x.images?.Select(x => x.url_list[0])?.ToList(),
+                }).ToList();
+                videoItems.AddRange(awemes);
+            }
+            WeakReferenceMessenger.Default.Send(new NotifyMessage($"开始下载合集" + mixItem.MixTitle, true));
+            foreach (var item in videoItems)
+            {
+                await _douYinDownlaodService.DownLoadVideoAsync(item);
+                await Task.Delay(500);
+            }
+            WeakReferenceMessenger.Default.Send(new NotifyMessage($"本次下载完成共{videoItems.Count}条记录", false));
+            await Task.CompletedTask;
         }
         [RelayCommand]
         private async Task GetData()
@@ -102,7 +143,7 @@ namespace DouYin.DownLoader.ViewModels
         {
             _currenVideo = video;
             IsOpen = true;
-            var result = await _douYinDownlaodService.GetAwemeCommentList(video.AwemeId!);
+            var result = await _douYinDownlaodService.GetAwemeCommentListAsync(video.AwemeId!);
             if (result.status_code != 0)
             {
                 WeakReferenceMessenger.Default.Send(new NotifyMessage("获取数据异常"));
@@ -129,7 +170,7 @@ namespace DouYin.DownLoader.ViewModels
         [RelayCommand]
         private async Task NextPage()
         {
-            var result = await _douYinDownlaodService.GetAwemeCommentList(_currenVideo.AwemeId!, _commentMaxCursor);
+            var result = await _douYinDownlaodService.GetAwemeCommentListAsync(_currenVideo.AwemeId!, _commentMaxCursor);
             if (result.status_code != 0)
             {
                 WeakReferenceMessenger.Default.Send(new NotifyMessage("获取数据异常"));
@@ -166,10 +207,11 @@ namespace DouYin.DownLoader.ViewModels
             await MiniExcel.SaveAsAsync(directory + fileName, CommentList.CommentItems);
             WeakReferenceMessenger.Default.Send(new NotifyMessage($"保存成功：{Constant.FilePath ?? AppDomain.CurrentDomain.BaseDirectory + directory + fileName}", false));
         }
+
         private async Task GetAwemeList()
         {
             WeakReferenceMessenger.Default.Send(new NotifyMessage("开始请求数据", true));
-            var result = await _douYinDownlaodService.GetAuthorVideos(_userId!, _maxCursor);
+            var result = await _douYinDownlaodService.GetAuthorVideosAsync(_userId!, _maxCursor);
             if (result.status_code != 0)
             {
                 WeakReferenceMessenger.Default.Send(new NotifyMessage("获取数据异常"));
@@ -182,7 +224,6 @@ namespace DouYin.DownLoader.ViewModels
                 AwemeId = x.aweme_id,
                 NikName = x.author!.nickname,
                 UId = x.author.uid,
-                SecUid = x.author.sec_uid,
                 Title = x.preview_title!,
                 VideoTag = string.Join(" ", x.video_tag!.Select(y => y.tag_name).ToList()),
                 VideoCover = x.video!.cover!.url_list![0],
