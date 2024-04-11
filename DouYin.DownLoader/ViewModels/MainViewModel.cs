@@ -1,9 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
-using MaterialDesignThemes.Wpf;
-using System.Diagnostics;
-using System.Windows;
 using DouYin.DownLoader.Common;
 using DouYin.DownLoader.Common.Models;
 
@@ -25,9 +22,10 @@ namespace DouYin.DownLoader.ViewModels
             _navigationService = navigationService;
             _menuBars = new List<MenuBar>()
                 {
-                    new MenuBar(){ Icon="Home",Title="视频下载",NameSpace=nameof(HomeViewModel)},
-                    new MenuBar(){ Icon="Note",Title="主页下载",NameSpace=nameof(NoteViewModel)},
-                     new MenuBar(){ Icon="Search",Title="搜索下载",NameSpace=nameof(SearchViewModel)},
+                    new MenuBar(){ Icon="Viedo",Title="视频下载",NameSpace=nameof(HomeViewModel)},
+                    new MenuBar(){ Icon="Search",Title="搜索下载",NameSpace=nameof(SearchViewModel)},
+                    new MenuBar(){ Icon="Home",Title="主页下载",NameSpace=nameof(NoteViewModel)},
+                    
                     new MenuBar(){ Icon="Cog",Title="设置",NameSpace=nameof(SettingViewModel)},
                 };
             _navigationService.CurrentViewModelChanged += () => CurrentViewModel = _navigationService.CurrentViewModel;

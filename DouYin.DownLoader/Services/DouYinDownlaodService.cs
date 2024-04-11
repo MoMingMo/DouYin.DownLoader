@@ -34,7 +34,8 @@ namespace DouYin.DownLoader.Services
         public async Task<DouYinAwemeDetailApiModel> GetAwemeDetailAsync(string url)
         {
             var modal_id = await ExtractModalId(url);
-            url = string.Format(Constant.AwemeDetailUrl, modal_id);
+           
+            url = await GenerateRequestParams(string.Format(Constant.AwemeDetailUrl, modal_id), Constant.UserAgent);
             var awemeDetail = await _client.GetFromJsonAsync<DouYinAwemeDetailApiModel>(url);
             return awemeDetail!;
 
