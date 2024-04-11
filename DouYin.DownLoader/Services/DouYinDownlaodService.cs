@@ -45,6 +45,12 @@ namespace DouYin.DownLoader.Services
             var awemeList = await _client.GetFromJsonAsync<DouYinAwemListApiModel>(url);
             return awemeList!;
         }
+        public async Task<DouYinAwemeSearchListApiModel> GetSearchVideosAsync(string keyWord, long max_cursor = 0)
+        {
+            var url = string.Format(Constant.AwemeSearchListUrl, keyWord, max_cursor); ;
+            var awemeList = await _client.GetFromJsonAsync<DouYinAwemeSearchListApiModel>(url);
+            return awemeList!;
+        }
         public async Task<DouYinCommentListApiModel> GetAwemeCommentListAsync(string awemeId, long max_cursor = 0)
         {
             var url = await GenerateRequestParams(string.Format(Constant.AwemeCommenListtUrl, awemeId, max_cursor), Constant.UserAgent);
@@ -63,9 +69,9 @@ namespace DouYin.DownLoader.Services
             var awemeMixAwmes = await _client.GetFromJsonAsync<DouYinAwemeMixApiModel>(url);
             return awemeMixAwmes!;
         }
-        public async Task DownLoadVideoAsync(VideoItem video)
+        public async Task DownLoadVideoAsync(VideoItem video, string tag = "")
         {
-            var directory = $"{Constant.FilePath ?? ""}{video.NikName}_{video.UId}\\";
+            var directory = string.IsNullOrWhiteSpace(tag) ? $"{Constant.FilePath ?? ""}{video.NikName}_{video.UId}\\" : ((Constant.FilePath ?? "") + tag+"\\");
             directory += video.AwemeType == 68 ? "images\\" : "";
             directory += string.IsNullOrEmpty(video.MixName) ? "" : video.MixName + "\\";
             if (!Directory.Exists(directory))
@@ -207,6 +213,6 @@ namespace DouYin.DownLoader.Services
             }
         }
 
-        
+
     }
 }

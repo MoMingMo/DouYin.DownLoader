@@ -34,7 +34,7 @@ namespace DouYin.DownLoader
                 .AddTransient<HomeViewModel>()
                 .AddTransient<NoteViewModel>()
                 .AddTransient<SettingViewModel>()
-
+                  .AddTransient<SearchViewModel>()
                 .AddScoped<IDouYinDownlaodService, DouYinDownlaodService>()
                 .AddSingleton<NavigationService>()
                 .BuildServiceProvider()); ;
