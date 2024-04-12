@@ -141,7 +141,7 @@ namespace DouYin.DownLoader.ViewModels
                .Select(x => new { x.digg_count, x.text })
                .ToList();
 
-            await Task.Run(async () =>
+            _= Task.Run(async () =>
              {
                  int i = 0;
                  while (result.has_more == 1&&i<20)
@@ -159,9 +159,10 @@ namespace DouYin.DownLoader.ViewModels
                      allComments.AddRange(comments);
                      i++;
                  }
+                 Comments = allComments.OrderByDescending(x => x.digg_count).Take(20).Select(x => x.text).ToList();
+                 IsShowHotCommentCard = Visibility.Hidden;
              });
-            Comments = allComments.OrderByDescending(x => x.digg_count).Take(20).Select(x => x.text).ToList();
-            IsShowHotCommentCard = Visibility.Hidden;
+          
         }
         [RelayCommand]
         private async Task Download()

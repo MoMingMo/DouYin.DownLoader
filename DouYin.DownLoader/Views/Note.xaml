@@ -227,12 +227,14 @@
                             <RowDefinition Height="auto" />
                             <RowDefinition />
                         </Grid.RowDefinitions>
-                        <md:Card Grid.RowSpan="2" Visibility="{Binding IsShowHotCommentCard}">
-                            <ProgressBar
-                                Width="50" Height="50" IsIndeterminate="True"
-                                Style="{StaticResource MaterialDesignCircularProgressBar}"
-                                Value="50" />
-                        </md:Card>
+
+                        <ProgressBar
+                            Grid.RowSpan="2" Width="50" Height="50"
+                            IsIndeterminate="True"
+                            Style="{StaticResource MaterialDesignCircularProgressBar}"
+                            Visibility="{Binding IsShowHotCommentCard}"
+                            Value="50" />
+
                         <ListBox
                             Grid.Row="1" Height="400"
                             ItemsSource="{Binding Comments, Mode=TwoWay}"

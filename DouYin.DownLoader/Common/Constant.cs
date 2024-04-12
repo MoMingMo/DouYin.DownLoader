@@ -7,7 +7,7 @@ namespace DouYin.DownLoader.Common
 
         public static string AwemeDetailUrl = "https://www.douyin.com/aweme/v1/web/aweme/detail/?aweme_id={0}&aid=1128&version_name=23.5.0&device_platform=android&os_version=2333";
         public static string AwemeListUrl = "https://www.douyin.com/aweme/v1/web/aweme/post/?device_platform=webapp&aid=6383&channel=channel_pc_web&sec_user_id={0}&max_cursor={1}&count=20";
-        public static string AwemeCommenListtUrl = "https://www.douyin.com/aweme/v1/web/comment/list/?aweme_id={0}&cursor={1}&count=15&cookie_enabled=true";
+        public static string AwemeCommenListtUrl = "https://www.douyin.com/aweme/v1/web/comment/list/?aweme_id={0}&cursor={1}&count=20&cookie_enabled=true";
         public static string AwemeMixUrl = "https://www.douyin.com/aweme/v1/web/mix/aweme/?mix_id={0}&max_cursor={1}&count=20";
         public static string AwemeMixListUrl = "https://www.douyin.com/aweme/v1/web/mix/list/?device_platform=webapp&aid=6383&channel=channel_pc_web&version_name=29.1.0&sec_user_id={0}&max_cursor={1}&count=20";
         public static string AwemeSearchListUrl = "https://www.douyin.com/aweme/v1/web/search/item/?device_platform=webapp&aid=6383&channel=channel_pc_web&search_channel=aweme_video_web&enable_history=1&keyword={0}&search_source=search_sug&query_correct_type=1&is_filter_search=0&offset={1}&count=20";
