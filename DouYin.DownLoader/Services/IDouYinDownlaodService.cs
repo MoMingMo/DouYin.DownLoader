@@ -9,7 +9,7 @@ namespace DouYin.DownLoader.Services
         Task<DouYinAwemeSearchListApiModel> GetSearchVideosAsync(string keyWord, long max_cursor = 0);
         Task DownLoadVideoAsync(VideoItem video, string tag = "");
         Task<DouYinCommentListApiModel> GetAwemeCommentListAsync(string awemeId, long max_cursor = 0);
-        Task<DouYinAwemeMixListApiModel> GetYinAwemeMixListAsync(string mix_id, long max_cursor = 0);
-        Task<DouYinAwemeMixApiModel> GetYinAwemeMixAwemesAsync(string mix_id, long max_cursor = 0);
+        Task<DouYinAwemeMixListApiModel> GetAwemeMixListAsync(string mix_id, long max_cursor = 0);
+        Task<DouYinAwemeMixApiModel> GetAwemeMixAwemesAsync(string mix_id, long max_cursor = 0);
     }
 }

@@ -31,6 +31,11 @@ namespace DouYin.DownLoader.Services
             var ms = GetMsToken();
             _client.DefaultRequestHeaders.Add("cookie", string.Format(Constant.Cookie!, ms));
         }
+        /// <summary>
+        /// 获取视频
+        /// </summary>
+        /// <param name="url"></param>
+        /// <returns></returns>
         public async Task<DouYinAwemeDetailApiModel> GetAwemeDetailAsync(string url)
         {
             var modal_id = await ExtractModalId(url);
@@ -40,36 +45,72 @@ namespace DouYin.DownLoader.Services
             return awemeDetail!;
 
         }
+        /// <summary>
+        /// 获取主页视频列表
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="max_cursor"></param>
+        /// <returns></returns>
         public async Task<DouYinAwemListApiModel> GetAuthorVideosAsync(string userId, long max_cursor = 0)
         {
             var url = await GenerateRequestParams(string.Format(Constant.AwemeListUrl, userId, max_cursor), Constant.UserAgent);
             var awemeList = await _client.GetFromJsonAsync<DouYinAwemListApiModel>(url);
             return awemeList!;
         }
+        /// <summary>
+        /// 获取查询视频列表
+        /// </summary>
+        /// <param name="keyWord"></param>
+        /// <param name="max_cursor"></param>
+        /// <returns></returns>
         public async Task<DouYinAwemeSearchListApiModel> GetSearchVideosAsync(string keyWord, long max_cursor = 0)
         {
             var url = string.Format(Constant.AwemeSearchListUrl, keyWord, max_cursor); ;
             var awemeList = await _client.GetFromJsonAsync<DouYinAwemeSearchListApiModel>(url);
             return awemeList!;
         }
+        /// <summary>
+        /// 获取视频评论
+        /// </summary>
+        /// <param name="awemeId"></param>
+        /// <param name="max_cursor"></param>
+        /// <returns></returns>
         public async Task<DouYinCommentListApiModel> GetAwemeCommentListAsync(string awemeId, long max_cursor = 0)
         {
             var url = await GenerateRequestParams(string.Format(Constant.AwemeCommenListtUrl, awemeId, max_cursor), Constant.UserAgent);
             var awemeCommentList = await _client.GetFromJsonAsync<DouYinCommentListApiModel>(url);
             return awemeCommentList!;
         }
-        public async Task<DouYinAwemeMixListApiModel> GetYinAwemeMixListAsync(string userId, long max_cursor = 0)
+        /// <summary>
+        /// 获取合集列表
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="max_cursor"></param>
+        /// <returns></returns>
+        public async Task<DouYinAwemeMixListApiModel> GetAwemeMixListAsync(string userId, long max_cursor = 0)
         {
             var url = await GenerateRequestParams(string.Format(Constant.AwemeMixListUrl, userId, max_cursor), Constant.UserAgent);
             var awemeMixList = await _client.GetFromJsonAsync<DouYinAwemeMixListApiModel>(url);
             return awemeMixList!;
         }
-        public async Task<DouYinAwemeMixApiModel> GetYinAwemeMixAwemesAsync(string mix_id, long max_cursor = 0)
+        /// <summary>
+        ///获取合集中视频列表   
+        /// </summary>
+        /// <param name="mix_id"></param>
+        /// <param name="max_cursor"></param>
+        /// <returns></returns>
+        public async Task<DouYinAwemeMixApiModel> GetAwemeMixAwemesAsync(string mix_id, long max_cursor = 0)
         {
             var url = string.Format(Constant.AwemeMixUrl, mix_id, max_cursor);
             var awemeMixAwmes = await _client.GetFromJsonAsync<DouYinAwemeMixApiModel>(url);
             return awemeMixAwmes!;
         }
+        /// <summary>
+        /// 下载视频及图集
+        /// </summary>
+        /// <param name="video"></param>
+        /// <param name="tag"></param>
+        /// <returns></returns>
         public async Task DownLoadVideoAsync(VideoItem video, string tag = "")
         {
             var directory = string.IsNullOrWhiteSpace(tag) ? $"{Constant.FilePath ?? ""}{video.NikName}_{video.UId}\\" : ((Constant.FilePath ?? "") + tag+"\\");
@@ -80,8 +121,8 @@ namespace DouYin.DownLoader.Services
                 Directory.CreateDirectory(directory);
             }
 
-            var coverFileName = $"{directory}{video.AwemeId}_cover.png";
-            var videoFileName = $"{directory}{video.AwemeId}.mp4";
+            var coverFileName = $"{directory}{video.Digg}{video.AwemeId}_cover.png";
+            var videoFileName = $"{directory}{video.Digg}{video.AwemeId}.mp4";
             try
             {
                 string? msg;
@@ -160,6 +201,12 @@ namespace DouYin.DownLoader.Services
             }
 
         }
+        /// <summary>
+        /// 生成X-Bogus
+        /// </summary>
+        /// <param name="url"></param>
+        /// <param name="userAgent"></param>
+        /// <returns></returns>
         private async Task<string> GenerateRequestParams(string url, string userAgent)
         {
 
@@ -168,11 +215,15 @@ namespace DouYin.DownLoader.Services
             var engine = new Engine();
             engine.Execute(File.ReadAllText("./douyin_x-bogus.js"));
             var xbogus = engine.Invoke("sign", query, userAgent).AsString();
-            await Console.Out.WriteLineAsync("X-Bogus=" + xbogus);
             string newUrl = url + "&X-Bogus=" + xbogus;
 
             return newUrl;
         }
+        /// <summary>
+        /// 生成mstoken
+        /// </summary>
+        /// <param name="randomLength"></param>
+        /// <returns></returns>
         public string GenerateRandomString(int randomLength)
         {
             string baseStr = "ABCDEFGHIGKLMNOPQRSTUVWXYZabcdefghigklmnopqrstuvwxyz0123456789=";
@@ -185,10 +236,21 @@ namespace DouYin.DownLoader.Services
             }
             return randomStr.ToString();
         }
+        /// <summary>
+        /// 生成mstoken
+        /// </summary>
+        /// <param name="randomLength"></param>
+        /// <returns></returns>
         public string GetMsToken()
         {
             return GenerateRandomString(107);
         }
+        /// <summary>
+        /// 解析地址获取视频id
+        /// </summary>
+        /// <param name="url"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
         private async Task<string> ExtractModalId(string url)
         {
             string pattern = @"/(\d+)\?";

@@ -3,7 +3,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:i="http://schemas.microsoft.com/xaml/behaviors" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes" xmlns:vm="clr-namespace:DouYin.DownLoader.ViewModels"
     d:DataContext="{d:DesignInstance Type=vm:SearchViewModel}"
-    d:DesignHeight="450" d:DesignWidth="800" mc:Ignorable="d">
+    d:DesignHeight="960" d:DesignWidth="1080" mc:Ignorable="d">
 
 
     <Grid Margin="0,10">
@@ -51,7 +51,7 @@
 
                         <md:Card Margin="5,5,0,0">
                             <Grid
-                                Width="260" MinHeight="280" MaxHeight="300">
+                                Width="260" MinHeight="280" MaxHeight="350">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="50" />
                                     <RowDefinition Height="*" />
@@ -74,7 +74,7 @@
                                 </Border>
                                 <Image
                                     x:Name="image" Grid.Row="0" Grid.RowSpan="4"
-                                    MinWidth="220" MinHeight="260" Margin="5"
+                                    Width="260" Height="260" Margin="5"
                                     Source="{Binding VideoCover}"
                                     Stretch="Fill" />
                                 <StackPanel

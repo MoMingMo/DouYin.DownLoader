@@ -8,6 +8,12 @@ using CommunityToolkit.Mvvm.Messaging;
 using DouYin.DownLoader.Common;
 using MiniExcelLibs;
 using System.IO;
+using FlyleafLib.MediaPlayer;
+using FlyleafLib;
+using System.Windows.Media;
+using System;
+using Vortice.Direct3D11;
+using System.Windows;
 
 namespace DouYin.DownLoader.ViewModels
 {
@@ -32,9 +38,22 @@ namespace DouYin.DownLoader.ViewModels
         private ICollection<MixItem> _mixItems;
         [ObservableProperty]
         private bool _isMixShow;
+        [ObservableProperty]
+        private Player _flPlayer;
+        [ObservableProperty]
+        private ICollection<string> _comments;
+        [ObservableProperty]
+        private bool isShowHotComment=false;
+        [ObservableProperty]
+        private Visibility isShowHotCommentCard =Visibility.Hidden;
         public NoteViewModel(IDouYinDownlaodService douYinDownlaodService)
         {
             VideoItems = new List<VideoItem>();
+            Comments = new List<string>();
+            var config = new Config();
+
+
+            FlPlayer = new Player(config);
             _douYinDownlaodService = douYinDownlaodService;
         }
         [RelayCommand]
@@ -42,7 +61,7 @@ namespace DouYin.DownLoader.ViewModels
         {
             ExtraUserId(Url);
             MixItems = new List<MixItem>();
-            var result = await _douYinDownlaodService.GetYinAwemeMixListAsync(_userId!, 0);
+            var result = await _douYinDownlaodService.GetAwemeMixListAsync(_userId!, 0);
             if (result.status_code != 0)
             {
             }
@@ -60,7 +79,7 @@ namespace DouYin.DownLoader.ViewModels
         [RelayCommand]
         private async Task DownloadMix(MixItem mixItem)
         {
-            var result = await _douYinDownlaodService.GetYinAwemeMixAwemesAsync(mixItem.MixId, 0);
+            var result = await _douYinDownlaodService.GetAwemeMixAwemesAsync(mixItem.MixId, 0);
             var videoItems = result.aweme_list.Select(x => new VideoItem
             {
                 AwemeId = x.aweme_id,
@@ -75,7 +94,7 @@ namespace DouYin.DownLoader.ViewModels
             }).ToList();
             while (result.has_more == 1)
             {
-                result = await _douYinDownlaodService.GetYinAwemeMixAwemesAsync(mixItem.MixId, result.cursor);
+                result = await _douYinDownlaodService.GetAwemeMixAwemesAsync(mixItem.MixId, result.cursor);
                 var awemes = result.aweme_list.Select(x => new VideoItem
                 {
                     AwemeId = x.aweme_id,
@@ -104,6 +123,45 @@ namespace DouYin.DownLoader.ViewModels
             VideoItems = new List<VideoItem>();
             ExtraUserId(Url);
             await GetAwemeList();
+        }
+        [RelayCommand]
+        private async Task MouseDown(VideoItem video)
+        {
+            IsShowHotCommentCard = Visibility.Visible;
+            Comments = new List<string>();
+            FlPlayer.Commands.Open.Execute(video.Video);
+            var result = await _douYinDownlaodService.GetAwemeCommentListAsync(video.AwemeId!);
+            if (result.status_code != 0)
+            {
+                WeakReferenceMessenger.Default.Send(new NotifyMessage("获取数据异常"));
+            }
+            var allComments = result.comments!
+               .Where(x => x.content_type != 2)
+               .OrderByDescending(x => x.digg_count)
+               .Select(x => new { x.digg_count, x.text })
+               .ToList();
+
+            await Task.Run(async () =>
+             {
+                 int i = 0;
+                 while (result.has_more == 1&&i<20)
+                 {
+                      result = await _douYinDownlaodService.GetAwemeCommentListAsync(video.AwemeId!, result.cursor);
+                     if (result.status_code != 0)
+                     {
+                         WeakReferenceMessenger.Default.Send(new NotifyMessage("获取数据异常"));
+                     }
+                     var comments = result.comments!
+                                     .Where(x => x.content_type != 2)
+                                     .OrderByDescending(x => x.digg_count)
+                                     .Select(x => new { x.digg_count, x.text })
+                                     .ToList();
+                     allComments.AddRange(comments);
+                     i++;
+                 }
+             });
+            Comments = allComments.OrderByDescending(x => x.digg_count).Take(20).Select(x => x.text).ToList();
+            IsShowHotCommentCard = Visibility.Hidden;
         }
         [RelayCommand]
         private async Task Download()
@@ -141,6 +199,7 @@ namespace DouYin.DownLoader.ViewModels
         [RelayCommand]
         private async Task ShowComment(VideoItem video)
         {
+
             _currenVideo = video;
             IsOpen = true;
             var result = await _douYinDownlaodService.GetAwemeCommentListAsync(video.AwemeId!);
@@ -218,23 +277,25 @@ namespace DouYin.DownLoader.ViewModels
             }
             _maxCursor = result.max_cursor;
             _hasMore = result.has_more;
-            var videos = result.aweme_list!.Select(x => new VideoItem
-            {
-                AwemeType = x.aweme_type,
-                AwemeId = x.aweme_id,
-                NikName = x.author!.nickname,
-                UId = x.author.uid,
-                Title = x.preview_title!,
-                VideoTag = string.Join(" ", x.video_tag!.Select(y => y.tag_name).ToList()),
-                VideoCover = x.video!.cover!.url_list![0],
-                Video = x.video!.play_addr!.url_list![0],
-                Images = x.images?.Select(x => x.url_list[0])?.ToList(),
-                CollectCount = x.statistics!.collect_count,
-                ShareCount = x.statistics!.share_count,
-                CommentCount = x.statistics!.comment_count,
-                DiggCount = x.statistics!.digg_count,
-            }).ToList();
-            VideoItems = VideoItems.Concat(videos).ToList();
+            var videos = result.aweme_list!.Select(x =>
+           new VideoItem
+           {
+               AwemeType = x.aweme_type,
+               AwemeId = x.aweme_id,
+               NikName = x.author!.nickname,
+               UId = x.author.uid,
+               Title = x.preview_title!,
+               VideoTag = string.Join(" ", x.video_tag!.Select(y => y.tag_name).ToList()),
+               VideoCover = x.video!.cover!.url_list![0],
+               Video = x.video!.play_addr!.url_list![0],
+               Images = x.images?.Select(x => x.url_list[0])?.ToList(),
+               CollectCount = x.statistics!.collect_count,
+               ShareCount = x.statistics!.share_count,
+               CommentCount = x.statistics!.comment_count,
+               DiggCount = x.statistics!.digg_count,
+
+           }).ToList();
+            VideoItems = VideoItems.Concat(videos).DistinctBy(x => x.AwemeId).OrderByDescending(x => x.DiggCount).ToList();
             WeakReferenceMessenger.Default.Send(new NotifyMessage("获取数据成功", false));
         }
         private void ExtraUserId(string url)

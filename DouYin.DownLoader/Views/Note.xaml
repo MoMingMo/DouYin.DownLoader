@@ -1,9 +1,10 @@
 ﻿<UserControl
     x:Class="DouYin.DownLoader.Views.Note" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:i="http://schemas.microsoft.com/xaml/behaviors" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes" xmlns:vm="clr-namespace:DouYin.DownLoader.ViewModels"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:fl="clr-namespace:FlyleafLib.Controls.WPF;assembly=FlyleafLib" xmlns:flwpf="clr-namespace:FlyleafLib.Controls.WPF;assembly=FlyleafLib.Controls.WPF"
+    xmlns:i="http://schemas.microsoft.com/xaml/behaviors" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
+    xmlns:vm="clr-namespace:DouYin.DownLoader.ViewModels"
     d:DataContext="{d:DesignInstance Type=vm:NoteViewModel}"
-    d:DesignHeight="450" d:DesignWidth="800" mc:Ignorable="d">
+    d:DesignHeight="960" d:DesignWidth="1080" mc:Ignorable="d">
 
 
     <Grid Margin="0,10">
@@ -12,8 +13,14 @@
             <RowDefinition Height="auto" />
             <RowDefinition />
         </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="350" />
+        </Grid.ColumnDefinitions>
+
         <DockPanel
-            Margin="0,10" HorizontalAlignment="Left" LastChildFill="True">
+            Grid.ColumnSpan="2" Margin="0,10" HorizontalAlignment="Left"
+            LastChildFill="True">
             <TextBlock
                 Width="60" Margin="10,0" VerticalAlignment="Center"
                 Text="主页链接" />
@@ -34,8 +41,8 @@
                 Content="下载当前数据" />
         </DockPanel>
         <ScrollViewer
-            x:Name="cpllectionScrollViewer" Grid.Row="1" Margin="0,5"
-            HorizontalScrollBarVisibility="Auto"
+            x:Name="cpllectionScrollViewer" Grid.Row="1" Grid.ColumnSpan="2"
+            Margin="0,5" HorizontalScrollBarVisibility="Auto"
             Visibility="{Binding IsMixShow}">
             <ItemsControl ItemsSource="{Binding MixItems}">
                 <ItemsControl.ItemsPanel>
@@ -108,10 +115,8 @@
 
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-
-                        <md:Card Margin="5,5,0,0">
-                            <Grid
-                                Width="260" MinHeight="280" MaxHeight="300">
+                        <md:Card Margin="10,10,0,0">
+                            <Grid Width="210" Height="260">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="50" />
                                     <RowDefinition Height="*" />
@@ -119,7 +124,7 @@
                                 </Grid.RowDefinitions>
 
                                 <TextBlock
-                                    Width="200" Margin="10" HorizontalAlignment="Left"
+                                    Width="160" Margin="10" HorizontalAlignment="Left"
                                     Panel.ZIndex="1" FontSize="10" FontWeight="Bold"
                                     Foreground="Red"
                                     Text="{Binding Title}" />
@@ -132,50 +137,67 @@
                                         Height="30" HorizontalAlignment="Center" FontSize="15"
                                         FontWeight="Bold" Foreground="White" Text="图集" />
                                 </Border>
+
                                 <Image
                                     x:Name="image" Grid.Row="0" Grid.RowSpan="4"
-                                    MinWidth="220" MinHeight="260" Margin="5"
-                                    Source="{Binding VideoCover}"
+                                    Width="210" Height="260"
+                                    Source="{Binding VideoCover, Mode=TwoWay}"
                                     Stretch="Fill" />
-                                <StackPanel
-                                    Grid.Row="3" Width="250" Margin="5"
-                                    Orientation="Horizontal">
-                                    <md:PackIcon Margin="5" Kind="Heart" />
-                                    <TextBlock
-                                        Width="40" Margin="0,8" FontSize="10"
-                                        Foreground="Red"
-                                        Text="{Binding Digg}" />
+                                <Button
+                                    Grid.Row="0" Grid.RowSpan="4" Width="50"
+                                    Height="50" Padding="0"
+                                    Background="{x:Null}"
+                                    BorderBrush="{x:Null}"
+                                    Command="{Binding DataContext.MouseDownCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                    CommandParameter="{Binding}"
+                                    ToolTip="播放">
+                                    <md:PackIcon
+                                        Width="50" Height="50" Kind="PlayCircle" />
+                                </Button>
 
-                                    <md:PackIcon Margin="3" Kind="Star" />
-                                    <TextBlock
-                                        Width="40" Margin="0,8" FontSize="10"
-                                        Foreground="Red"
-                                        Text="{Binding Collect}" />
-                                    <StackPanel Background="{x:Null}" Orientation="Horizontal">
+                                <DockPanel
+                                    Grid.Row="3" Width="200" Height="25">
+                                    <StackPanel
+                                        Margin="0,5" DockPanel.Dock="Left" Orientation="Horizontal">
+                                        <md:PackIcon Kind="Heart" />
+                                        <TextBlock
+                                            Width="40" Margin="2" FontSize="10"
+                                            Foreground="Red"
+                                            Text="{Binding Digg}" />
+
+                                        <md:PackIcon Kind="Star" />
+                                        <TextBlock
+                                            Width="40" Margin="2" FontSize="10"
+                                            Foreground="Red"
+                                            Text="{Binding Collect}" />
+                                    </StackPanel>
+                                    <DockPanel Margin="-10,0" DockPanel.Dock="Right">
+                                        <StackPanel DockPanel.Dock="Left" Orientation="Horizontal">
+                                            <Button
+                                                Width="30" Height="20" Padding="0,2,0,0"
+                                                Background="{x:Null}"
+                                                BorderBrush="{x:Null}"
+                                                Command="{Binding DataContext.ShowCommentCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                CommandParameter="{Binding}">
+                                                <md:PackIcon Kind="CommentProcessingOutline" />
+                                            </Button>
+                                            <TextBlock
+                                                Width="40" Margin="0,6" FontSize="10"
+                                                Foreground="Red"
+                                                Text="{Binding Comment}" />
+                                        </StackPanel>
                                         <Button
-                                            Width="50" Height="20" Margin="-10,0,5,0"
-                                            HorizontalAlignment="Left"
+                                            Width="30" Height="20" Padding="0,2,0,0"
+                                            HorizontalContentAlignment="Left"
                                             Background="{x:Null}"
                                             BorderBrush="{x:Null}"
-                                            Command="{Binding DataContext.ShowCommentCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            Command="{Binding DataContext.DownloadOneCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                             CommandParameter="{Binding}">
-                                            <md:PackIcon Margin="0" Kind="CommentProcessingOutline" />
+                                            <md:PackIcon Kind="Download" />
                                         </Button>
-                                        <TextBlock
-                                            Width="30" Margin="-15,8,0,8" FontSize="10"
-                                            Foreground="Red"
-                                            Text="{Binding Comment}" />
-                                    </StackPanel>
-                                    <Button
-                                        Width="45" Height="20" Margin="0,0,5,0"
-                                        HorizontalAlignment="Left"
-                                        Background="{x:Null}"
-                                        BorderBrush="{x:Null}"
-                                        Command="{Binding DataContext.DownloadOneCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                        CommandParameter="{Binding}">
-                                        <md:PackIcon Kind="Download" />
-                                    </Button>
-                                </StackPanel>
+                                    </DockPanel>
+
+                                </DockPanel>
                             </Grid>
                         </md:Card>
                         <DataTemplate.Triggers>
@@ -188,18 +210,58 @@
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
         </ScrollViewer>
+        <md:Card
+            Grid.Row="2" Grid.Column="1" Margin="10,0">
+            <DockPanel>
+                <GroupBox
+                    Height="350" Margin="2,5" DockPanel.Dock="Top"
+                    Header="视频">
+                    <fl:FlyleafHost
+                        Height="350" AttachedDragMove="Both" Background="AliceBlue"
+                        DockPanel.Dock="Top"
+                        Player="{Binding FlPlayer, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" />
+                </GroupBox>
+                <GroupBox Margin="2,5" Header="热评">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="auto" />
+                            <RowDefinition />
+                        </Grid.RowDefinitions>
+                        <md:Card Grid.RowSpan="2" Visibility="{Binding IsShowHotCommentCard}">
+                            <ProgressBar
+                                Width="50" Height="50" IsIndeterminate="True"
+                                Style="{StaticResource MaterialDesignCircularProgressBar}"
+                                Value="50" />
+                        </md:Card>
+                        <ListBox
+                            Grid.Row="1" Height="400"
+                            ItemsSource="{Binding Comments, Mode=TwoWay}"
+                            ScrollViewer.HorizontalScrollBarVisibility="Hidden" ScrollViewer.VerticalScrollBarVisibility="Disabled">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock
+                                        Margin="2" OverridesDefaultStyle="False"
+                                        Text="{Binding}"
+                                        TextWrapping="NoWrap" />
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </Grid>
+                </GroupBox>
+
+            </DockPanel>
+        </md:Card>
         <md:DialogHost
-            x:Name="dg" Grid.Row="1" MaxWidth="800"
+            x:Name="dg" Grid.Row="1" Width="350"
             CloseOnClickAway="True"
             IsOpen="{Binding IsOpen}">
 
             <md:DialogHost.DialogContent>
-
                 <DockPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                     <DataGrid
-                        x:Name="commentScrollViewer" Height="520" Margin="10"
-                        AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False"
-                        CanUserReorderColumns="False" DockPanel.Dock="Top" IsReadOnly="True"
+                        Height="520" Margin="10" AutoGenerateColumns="False"
+                        CanUserAddRows="False" CanUserDeleteRows="False" CanUserReorderColumns="False"
+                        DockPanel.Dock="Top" IsReadOnly="True"
                         ItemsSource="{Binding CommentList.CommentItems, Mode=TwoWay}"
                         ScrollViewer.VerticalScrollBarVisibility="Auto">
 

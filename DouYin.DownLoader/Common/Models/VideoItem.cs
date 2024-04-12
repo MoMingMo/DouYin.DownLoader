@@ -1,4 +1,6 @@
-﻿namespace DouYin.DownLoader.Common.Models
+﻿using FlyleafLib.MediaPlayer;
+
+namespace DouYin.DownLoader.Common.Models
 {
     public class VideoItem
     {

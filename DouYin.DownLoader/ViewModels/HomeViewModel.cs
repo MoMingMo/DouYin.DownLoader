@@ -4,6 +4,9 @@ using CommunityToolkit.Mvvm.Messaging;
 using DouYin.DownLoader.Common;
 using DouYin.DownLoader.Common.Models;
 using DouYin.DownLoader.Services;
+using FlyleafLib;
+using FlyleafLib.MediaPlayer;
+using System;
 
 namespace DouYin.DownLoader.ViewModels
 {
@@ -11,6 +14,10 @@ namespace DouYin.DownLoader.ViewModels
     {
         public HomeViewModel(IDouYinDownlaodService douYinDownlaodService)
         {
+            Player = new Player(new Config 
+            {
+                
+            });
             _douYinDownlaodService = douYinDownlaodService;
         }
         [ObservableProperty]
@@ -19,7 +26,8 @@ namespace DouYin.DownLoader.ViewModels
         [ObservableProperty]
         private VideoItem? _douYin;
         private readonly IDouYinDownlaodService _douYinDownlaodService;
-
+        [ObservableProperty]
+        private Player player;
         [RelayCommand]
         private async Task Download()
         {
@@ -32,6 +40,7 @@ namespace DouYin.DownLoader.ViewModels
                     WeakReferenceMessenger.Default.Send(new NotifyMessage("请求接口异常"));
                     return;
                 }
+                
                 var author = awemeDetail!.aweme_detail!.author!;
                 var video = awemeDetail!.aweme_detail!.video!;
                 var nikName = author.nickname!;
@@ -61,6 +70,7 @@ namespace DouYin.DownLoader.ViewModels
                     AwemeType = aweme_type,
                     Images=imageUlrs,
                 };
+                Player.Commands.Open.Execute(DouYin.Images);
                 _ = _douYinDownlaodService.DownLoadVideoAsync(DouYin);
             }
             catch (Exception ex)

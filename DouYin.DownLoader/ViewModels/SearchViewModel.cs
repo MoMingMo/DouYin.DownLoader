@@ -171,7 +171,7 @@ namespace DouYin.DownLoader.ViewModels
                 CommentCount = x.aweme_info.statistics!.comment_count,
                 DiggCount = x.aweme_info.statistics!.digg_count,
             }).ToList();
-            VideoItems = VideoItems.Concat(videos).Distinct().OrderByDescending(x=>x.DiggCount).ToList();
+            VideoItems = VideoItems.Concat(videos).DistinctBy(x=>x.AwemeId).OrderByDescending(x=>x.DiggCount).ToList();
             WeakReferenceMessenger.Default.Send(new NotifyMessage("获取数据成功", false));
         }
         
