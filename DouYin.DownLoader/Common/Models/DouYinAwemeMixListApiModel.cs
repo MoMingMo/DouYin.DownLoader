@@ -18,7 +18,7 @@ namespace DouYin.DownLoader.Common.Models
         public Mix_Infos[] mix_infos { get; set; }
         public int status_code { get; set; }
         public object status_msg { get; set; }
-        public int total { get; set; }
+        public int? total { get; set; }
     }
 
     public class Extra
@@ -64,7 +64,7 @@ namespace DouYin.DownLoader.Common.Models
     {
         public int collect_vv { get; set; }
         public int current_episode { get; set; }
-        public int play_vv { get; set; }
+        public long? play_vv { get; set; }
         public int updated_to_episode { get; set; }
     }
 

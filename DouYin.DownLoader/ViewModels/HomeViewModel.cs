@@ -70,7 +70,7 @@ namespace DouYin.DownLoader.ViewModels
                     AwemeType = aweme_type,
                     Images=imageUlrs,
                 };
-                Player.Commands.Open.Execute(DouYin.Images);
+                Player.Commands.Open.Execute(DouYin.Video);
                 _ = _douYinDownlaodService.DownLoadVideoAsync(DouYin);
             }
             catch (Exception ex)

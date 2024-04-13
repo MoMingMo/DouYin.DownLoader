@@ -20,7 +20,7 @@ namespace DouYin.DownLoader.Common
         {
             string pattern = @"msToken=.*?=="; // 正则表达式匹配不固定部分
 
-            string replacedText = Regex.Replace(cookie, pattern, "msToken={0}");
+            string replacedText = Regex.Replace(cookie??"", pattern, "msToken={0}");
             Cookie = replacedText;
         }
         public static void SetFilePath(string filePath)

@@ -20,10 +20,10 @@ namespace DouYin.DownLoader.ViewModels
     public partial class NoteViewModel : ViewModelBase
     {
         private string? _userId;
-        private long _maxCursor = 0;
-        private long _commentMaxCursor = 0;
-        private int _hasMore = 1;
-        private int _commenthasMore = 1;
+        private long? _maxCursor = 0;
+        private long? _commentMaxCursor = 0;
+        private int? _hasMore = 1;
+        private int? _commenthasMore = 1;
         private VideoItem _currenVideo;
         private readonly IDouYinDownlaodService _douYinDownlaodService;
         [ObservableProperty]
@@ -42,8 +42,6 @@ namespace DouYin.DownLoader.ViewModels
         private Player _flPlayer;
         [ObservableProperty]
         private ICollection<string> _comments;
-        [ObservableProperty]
-        private bool isShowHotComment=false;
         [ObservableProperty]
         private Visibility isShowHotCommentCard =Visibility.Hidden;
         public NoteViewModel(IDouYinDownlaodService douYinDownlaodService)
@@ -65,15 +63,16 @@ namespace DouYin.DownLoader.ViewModels
             if (result.status_code != 0)
             {
             }
-            MixItems = result.mix_infos.Select(x => new MixItem
+            MixItems = result.mix_infos?.Select(x => new MixItem
             {
-                MixId = x.mix_id,
-                MixCorver = x.cover_url.url_list[0],
-                PlayCount = x.statis.play_vv,
-                MixTitle = x.mix_name,
-                Chapter = $"更新至{x.statis.updated_to_episode}集"
+                MixId = x?.mix_id,
+                MixCorver = x?.cover_url.url_list[0],
+                PlayCount = x?.statis.play_vv,
+                MixTitle = x?.mix_name,
+                Chapter = $"更新至{x?.statis.updated_to_episode}集"
 
-            }).ToList();
+            })?.ToList()??new List<MixItem>();
+           
             IsMixShow = MixItems.Any();
         }
         [RelayCommand]
@@ -130,39 +129,48 @@ namespace DouYin.DownLoader.ViewModels
             IsShowHotCommentCard = Visibility.Visible;
             Comments = new List<string>();
             FlPlayer.Commands.Open.Execute(video.Video);
-            var result = await _douYinDownlaodService.GetAwemeCommentListAsync(video.AwemeId!);
-            if (result.status_code != 0)
+            try
             {
-                WeakReferenceMessenger.Default.Send(new NotifyMessage("获取数据异常"));
-            }
-            var allComments = result.comments!
-               .Where(x => x.content_type != 2)
-               .OrderByDescending(x => x.digg_count)
-               .Select(x => new { x.digg_count, x.text })
-               .ToList();
+                var result = await _douYinDownlaodService.GetAwemeCommentListAsync(video.AwemeId!);
+                if (result.status_code != 0)
+                {
+                    WeakReferenceMessenger.Default.Send(new NotifyMessage("获取数据异常"));
+                }
+                var allComments = result.comments!
+                   .Where(x => x.content_type != 2)
+                   .OrderByDescending(x => x.digg_count)
+                   .Select(x => new { x.digg_count, x.text })
+                   .ToList();
 
-            _= Task.Run(async () =>
-             {
-                 int i = 0;
-                 while (result.has_more == 1&&i<20)
-                 {
-                      result = await _douYinDownlaodService.GetAwemeCommentListAsync(video.AwemeId!, result.cursor);
-                     if (result.status_code != 0)
-                     {
-                         WeakReferenceMessenger.Default.Send(new NotifyMessage("获取数据异常"));
-                     }
-                     var comments = result.comments!
-                                     .Where(x => x.content_type != 2)
-                                     .OrderByDescending(x => x.digg_count)
-                                     .Select(x => new { x.digg_count, x.text })
-                                     .ToList();
-                     allComments.AddRange(comments);
-                     i++;
-                 }
-                 Comments = allComments.OrderByDescending(x => x.digg_count).Take(20).Select(x => x.text).ToList();
-                 IsShowHotCommentCard = Visibility.Hidden;
-             });
-          
+                _ = Task.Run(async () =>
+                {
+                    int i = 0;
+                    while (result.has_more == 1 && i < 5)
+                    {
+                        result = await _douYinDownlaodService.GetAwemeCommentListAsync(video.AwemeId!, result.cursor);
+                        if (result.status_code != 0)
+                        {
+                            WeakReferenceMessenger.Default.Send(new NotifyMessage("获取数据异常"));
+                        }
+                        var comments = result.comments!
+                                        .Where(x => x.content_type != 2)
+                                        .OrderByDescending(x => x.digg_count)
+                                        .Select(x => new { x.digg_count, x.text })
+                                        .ToList();
+                        allComments.AddRange(comments);
+                        i++;
+                    }
+                    Comments = allComments.OrderByDescending(x => x.digg_count).Take(20).Select(x => x.text).ToList();
+                    IsShowHotCommentCard = Visibility.Hidden;
+                });
+            }
+            catch (Exception ex)
+            {
+                IsShowHotCommentCard = Visibility.Hidden;
+                WeakReferenceMessenger.Default.Send(new NotifyMessage("获取评论异常"));
+            }
+       
+
         }
         [RelayCommand]
         private async Task Download()
@@ -217,7 +225,7 @@ namespace DouYin.DownLoader.ViewModels
                     Text = x.text,
                     DiggCount = x.digg_count,
                     NickName = x.user.nickname,
-                    CreateTime = DateTimeOffset.FromUnixTimeSeconds(x.create_time).DateTime
+                    CreateTime = DateTimeOffset.FromUnixTimeSeconds(x.create_time.Value).DateTime
                 }).OrderByDescending(x => x.DiggCount)
                 .ToList();
             CommentList = new CommentList
@@ -245,7 +253,7 @@ namespace DouYin.DownLoader.ViewModels
                     Text = x.text,
                     DiggCount = x.digg_count,
                     NickName = x.user.nickname,
-                    CreateTime = DateTimeOffset.FromUnixTimeSeconds(x.create_time).DateTime
+                    CreateTime = DateTimeOffset.FromUnixTimeSeconds(x.create_time!.Value).DateTime
                 }).OrderByDescending(x => x.DiggCount)
                 .ToList();
             var data = CommentList.CommentItems;

@@ -22,7 +22,7 @@ namespace DouYin.DownLoader.ViewModels
             _navigationService = navigationService;
             _menuBars = new List<MenuBar>()
                 {
-                    new MenuBar(){ Icon="Viedo",Title="视频下载",NameSpace=nameof(HomeViewModel)},
+                    new MenuBar(){ Icon="Video",Title="视频下载",NameSpace=nameof(HomeViewModel)},
                     new MenuBar(){ Icon="Search",Title="搜索下载",NameSpace=nameof(SearchViewModel)},
                     new MenuBar(){ Icon="Home",Title="主页下载",NameSpace=nameof(NoteViewModel)},
                     

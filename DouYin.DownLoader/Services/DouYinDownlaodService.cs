@@ -29,7 +29,8 @@ namespace DouYin.DownLoader.Services
             _client.DefaultRequestHeaders.Add("user-agent", Constant.UserAgent);
             _client.DefaultRequestHeaders.Add("referer", "https://www.douyin.com/search/%E7%83%AD%E9%97%A8?publish_time=0&sort_type=0&source=switch_tab&type=video");
             var ms = GetMsToken();
-            _client.DefaultRequestHeaders.Add("cookie", string.Format(Constant.Cookie!, ms));
+            if (!string.IsNullOrWhiteSpace(Constant.Cookie))
+                _client.DefaultRequestHeaders.Add("cookie", string.Format(Constant.Cookie!, ms));
         }
         /// <summary>
         /// 获取视频
@@ -39,7 +40,7 @@ namespace DouYin.DownLoader.Services
         public async Task<DouYinAwemeDetailApiModel> GetAwemeDetailAsync(string url)
         {
             var modal_id = await ExtractModalId(url);
-           
+
             url = await GenerateRequestParams(string.Format(Constant.AwemeDetailUrl, modal_id), Constant.UserAgent);
             var awemeDetail = await _client.GetFromJsonAsync<DouYinAwemeDetailApiModel>(url);
             return awemeDetail!;
@@ -51,7 +52,7 @@ namespace DouYin.DownLoader.Services
         /// <param name="userId"></param>
         /// <param name="max_cursor"></param>
         /// <returns></returns>
-        public async Task<DouYinAwemListApiModel> GetAuthorVideosAsync(string userId, long max_cursor = 0)
+        public async Task<DouYinAwemListApiModel> GetAuthorVideosAsync(string userId, long? max_cursor = 0)
         {
             var url = await GenerateRequestParams(string.Format(Constant.AwemeListUrl, userId, max_cursor), Constant.UserAgent);
             var awemeList = await _client.GetFromJsonAsync<DouYinAwemListApiModel>(url);
@@ -63,7 +64,7 @@ namespace DouYin.DownLoader.Services
         /// <param name="keyWord"></param>
         /// <param name="max_cursor"></param>
         /// <returns></returns>
-        public async Task<DouYinAwemeSearchListApiModel> GetSearchVideosAsync(string keyWord, long max_cursor = 0)
+        public async Task<DouYinAwemeSearchListApiModel> GetSearchVideosAsync(string keyWord, long? max_cursor = 0)
         {
             var url = string.Format(Constant.AwemeSearchListUrl, keyWord, max_cursor); ;
             var awemeList = await _client.GetFromJsonAsync<DouYinAwemeSearchListApiModel>(url);
@@ -75,7 +76,7 @@ namespace DouYin.DownLoader.Services
         /// <param name="awemeId"></param>
         /// <param name="max_cursor"></param>
         /// <returns></returns>
-        public async Task<DouYinCommentListApiModel> GetAwemeCommentListAsync(string awemeId, long max_cursor = 0)
+        public async Task<DouYinCommentListApiModel> GetAwemeCommentListAsync(string awemeId, long? max_cursor = 0)
         {
             var url = await GenerateRequestParams(string.Format(Constant.AwemeCommenListtUrl, awemeId, max_cursor), Constant.UserAgent);
             var awemeCommentList = await _client.GetFromJsonAsync<DouYinCommentListApiModel>(url);
@@ -87,7 +88,7 @@ namespace DouYin.DownLoader.Services
         /// <param name="userId"></param>
         /// <param name="max_cursor"></param>
         /// <returns></returns>
-        public async Task<DouYinAwemeMixListApiModel> GetAwemeMixListAsync(string userId, long max_cursor = 0)
+        public async Task<DouYinAwemeMixListApiModel> GetAwemeMixListAsync(string userId, long? max_cursor = 0)
         {
             var url = await GenerateRequestParams(string.Format(Constant.AwemeMixListUrl, userId, max_cursor), Constant.UserAgent);
             var awemeMixList = await _client.GetFromJsonAsync<DouYinAwemeMixListApiModel>(url);
@@ -99,7 +100,7 @@ namespace DouYin.DownLoader.Services
         /// <param name="mix_id"></param>
         /// <param name="max_cursor"></param>
         /// <returns></returns>
-        public async Task<DouYinAwemeMixApiModel> GetAwemeMixAwemesAsync(string mix_id, long max_cursor = 0)
+        public async Task<DouYinAwemeMixApiModel> GetAwemeMixAwemesAsync(string mix_id, long? max_cursor = 0)
         {
             var url = string.Format(Constant.AwemeMixUrl, mix_id, max_cursor);
             var awemeMixAwmes = await _client.GetFromJsonAsync<DouYinAwemeMixApiModel>(url);
@@ -113,7 +114,7 @@ namespace DouYin.DownLoader.Services
         /// <returns></returns>
         public async Task DownLoadVideoAsync(VideoItem video, string tag = "")
         {
-            var directory = string.IsNullOrWhiteSpace(tag) ? $"{Constant.FilePath ?? ""}{video.NikName}_{video.UId}\\" : ((Constant.FilePath ?? "") + tag+"\\");
+            var directory = string.IsNullOrWhiteSpace(tag) ? $"{Constant.FilePath ?? ""}{video.NikName}_{video.UId}\\" : ((Constant.FilePath ?? "") + tag + "\\");
             directory += video.AwemeType == 68 ? "images\\" : "";
             directory += string.IsNullOrEmpty(video.MixName) ? "" : video.MixName + "\\";
             if (!Directory.Exists(directory))

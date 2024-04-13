@@ -7,7 +7,7 @@ namespace DouYin.DownLoader.Common.Models
         [ExcelColumnName("内容")]
         public string? Text { get; set; }
         [ExcelColumnName("点赞")]
-        public int DiggCount { get; set; }
+        public int? DiggCount { get; set; }
         [ExcelColumnName("用户昵称")]
         public string? NickName { get; set; }
         [ExcelColumnName("用户昵称")]

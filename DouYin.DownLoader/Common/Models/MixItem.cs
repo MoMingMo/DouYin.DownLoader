@@ -12,8 +12,8 @@ namespace DouYin.DownLoader.Common.Models
         public string MixCorver { get; set; }
         public string MixTitle { get; set; }
 
-        public long PlayCount { get; set; }
-        public string MixPlay => (PlayCount / 10000.00).ToString("f2") + "W";
+        public long? PlayCount { get; set; }
+        public string MixPlay => (PlayCount / 10000.00)?.ToString("f2") + "W";
         public string Chapter { get; set; }
     }
 }
