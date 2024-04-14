@@ -32,6 +32,12 @@ namespace DouYin.DownLoader.Services
             if (!string.IsNullOrWhiteSpace(Constant.Cookie))
                 _client.DefaultRequestHeaders.Add("cookie", string.Format(Constant.Cookie!, ms));
         }
+        public async Task<DouYinUserProfileApiModel> GetUserProfileAsync(string userId)
+        {
+            var url = await GenerateRequestParams(string.Format(Constant.UserProfileUrl, userId), Constant.UserAgent);
+            var userProfile = await _client.GetFromJsonAsync<DouYinUserProfileApiModel>(url);
+            return userProfile!;
+        }
         /// <summary>
         /// 获取视频
         /// </summary>
@@ -277,6 +283,6 @@ namespace DouYin.DownLoader.Services
             }
         }
 
-
+       
     }
 }

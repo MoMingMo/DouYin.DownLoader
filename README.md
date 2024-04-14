@@ -9,6 +9,9 @@
 1. WPF Material Design UI
 2. CommunityToolkit.Mvvm   
 3. Jint 运行js脚本
+4. FlyleafLib.Controls.WPF 视频播放
+5. MiniExcel Excel文件都出
+6. ValueConverters 
 ## 界面展示
 主页视频下界面
 
@@ -18,9 +21,9 @@
 
 ![单个作品下载界面](./images/单个视频.png)
 
-导航界面
+搜索界面
 
-![导航界面](./images/导航.png)
+![搜索界面](./images/搜索.png)
 作品评论列表界面
 
 ![作品评论列表界面](./images/评论列表.png)

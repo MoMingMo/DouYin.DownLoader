@@ -1,13 +1,13 @@
 ﻿<UserControl
     x:Class="DouYin.DownLoader.Views.Note" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:cv="clr-namespace:DouYin.DownLoader.Convertors" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:fl="clr-namespace:FlyleafLib.Controls.WPF;assembly=FlyleafLib"
-    xmlns:i="http://schemas.microsoft.com/xaml/behaviors" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:fl="clr-namespace:FlyleafLib.Controls.WPF;assembly=FlyleafLib" xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes" xmlns:vcon="clr-namespace:ValueConverters;assembly=ValueConverters"
     xmlns:vm="clr-namespace:DouYin.DownLoader.ViewModels"
     d:DataContext="{d:DesignInstance Type=vm:NoteViewModel}"
     d:DesignHeight="960" d:DesignWidth="1080" mc:Ignorable="d">
 
     <UserControl.Resources>
-        <cv:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+        <vcon:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
     </UserControl.Resources>
     <Grid Margin="0,10">
         <Grid.RowDefinitions>
@@ -49,7 +49,7 @@
         <ScrollViewer
             x:Name="cpllectionScrollViewer" Grid.Row="1" Grid.ColumnSpan="2"
             Margin="0,5" HorizontalScrollBarVisibility="Auto"
-            Visibility="{Binding IsMixShow, Converter={StaticResource BooleanToVisibilityConverter}}">
+            Visibility="{Binding IsMixShow, Converter={StaticResource BoolToVisibilityConverter}}">
             <ItemsControl ItemsSource="{Binding MixItems}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>

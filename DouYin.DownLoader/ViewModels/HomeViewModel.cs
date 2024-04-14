@@ -7,6 +7,7 @@ using DouYin.DownLoader.Services;
 using FlyleafLib;
 using FlyleafLib.MediaPlayer;
 using System;
+using System.Text.RegularExpressions;
 
 namespace DouYin.DownLoader.ViewModels
 {
@@ -14,9 +15,9 @@ namespace DouYin.DownLoader.ViewModels
     {
         public HomeViewModel(IDouYinDownlaodService douYinDownlaodService)
         {
-            Player = new Player(new Config 
+            Player = new Player(new Config
             {
-                
+
             });
             _douYinDownlaodService = douYinDownlaodService;
         }
@@ -28,19 +29,53 @@ namespace DouYin.DownLoader.ViewModels
         private readonly IDouYinDownlaodService _douYinDownlaodService;
         [ObservableProperty]
         private Player player;
+        [ObservableProperty]
+        private UserProfile _userProfile;
+        [ObservableProperty]
+        private bool isShowProfile=false;
+        private string userId;
         [RelayCommand]
         private async Task Download()
         {
-
+           IsShowProfile = false;
             try
             {
+
+                _ = Task.Run(async () =>
+                {
+                    ExtraUserId(Url);
+                    var userProfile = await _douYinDownlaodService.GetUserProfileAsync(userId);
+                    if (userProfile.status_code != 0)
+                    {
+                        WeakReferenceMessenger.Default.Send(new NotifyMessage("获取用户信息异常"));
+                        return;
+                    }
+                    var user = userProfile.user;
+                    UserProfile = new UserProfile
+                    {
+                        AvatorUrl = user.avatar_larger.url_list[0],
+                        NickName= user.nickname,
+                        FollowingCount=user.following_count,
+                        FollowerCount=user.max_follower_count,
+                        TotalFavoritedCount=user.total_favorited,
+                        Gender=user.gender==2?"女":"男",
+                        Country=user.country,
+                        Signature=user.signature.Trim(),
+                        UniqueId=user.unique_id,
+                        UserAge=user.user_age,
+                        IPLocation=user.ip_location,
+                        AwemeCount=user.aweme_count,
+                        
+                    };
+                    IsShowProfile = true;
+                });
                 var awemeDetail = await _douYinDownlaodService.GetAwemeDetailAsync(Url);
                 if (awemeDetail.status_code != 0)
                 {
                     WeakReferenceMessenger.Default.Send(new NotifyMessage("请求接口异常"));
                     return;
                 }
-                
+
                 var author = awemeDetail!.aweme_detail!.author!;
                 var video = awemeDetail!.aweme_detail!.video!;
                 var nikName = author.nickname!;
@@ -68,7 +103,7 @@ namespace DouYin.DownLoader.ViewModels
                     UId = uid!,
                     AwemeId = aweme_id!,
                     AwemeType = aweme_type,
-                    Images=imageUlrs,
+                    Images = imageUlrs,
                 };
                 Player.Commands.Open.Execute(DouYin.Video);
                 _ = _douYinDownlaodService.DownLoadVideoAsync(DouYin);
@@ -79,6 +114,16 @@ namespace DouYin.DownLoader.ViewModels
             }
         }
 
+        private void ExtraUserId(string url)
+        {
+            string pattern = @"/([^/?]+)(?:\?|$)";
 
+            Match match = Regex.Match(url, pattern);
+
+            if (match.Success)
+            {
+                userId = match.Groups[1].Value;
+            }
+        }
     }
 }

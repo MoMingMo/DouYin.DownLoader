@@ -11,5 +11,6 @@ namespace DouYin.DownLoader.Services
         Task<DouYinCommentListApiModel> GetAwemeCommentListAsync(string awemeId, long? max_cursor = 0);
         Task<DouYinAwemeMixListApiModel> GetAwemeMixListAsync(string mix_id, long? max_cursor = 0);
         Task<DouYinAwemeMixApiModel> GetAwemeMixAwemesAsync(string mix_id, long? max_cursor = 0);
+        Task<DouYinUserProfileApiModel> GetUserProfileAsync(string userId);
     }
 }

@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <None Remove="avator.jpg" />
+    <None Remove="ViewModels\HomeViewModel.cs~RF6cd28c1.TMP" />
   </ItemGroup>
 
   <ItemGroup>
@@ -22,6 +23,7 @@
     <PackageReference Include="Microsoft.Extensions.Http" Version="8.0.0" />
     <PackageReference Include="MiniExcel" Version="1.31.3" />
     <PackageReference Include="Prism.DryIoc" Version="9.0.401-pre" />
+    <PackageReference Include="ValueConverters" Version="3.0.26" />
   </ItemGroup>
 
   <ItemGroup>
@@ -65,6 +67,10 @@
     <None Update="FFmpeg\swscale-6.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Convertors\" />
   </ItemGroup>
 
 </Project>

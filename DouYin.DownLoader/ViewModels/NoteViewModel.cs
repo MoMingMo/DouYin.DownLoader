@@ -10,9 +10,6 @@ using MiniExcelLibs;
 using System.IO;
 using FlyleafLib.MediaPlayer;
 using FlyleafLib;
-using System.Windows.Media;
-using System;
-using Vortice.Direct3D11;
 using System.Windows;
 
 namespace DouYin.DownLoader.ViewModels
@@ -60,9 +57,7 @@ namespace DouYin.DownLoader.ViewModels
             ExtraUserId(Url);
             MixItems = new List<MixItem>();
             var result = await _douYinDownlaodService.GetAwemeMixListAsync(_userId!, 0);
-            if (result.status_code != 0)
-            {
-            }
+            
             MixItems = result.mix_infos?.Select(x => new MixItem
             {
                 MixId = x?.mix_id,
@@ -135,6 +130,7 @@ namespace DouYin.DownLoader.ViewModels
                 if (result.status_code != 0)
                 {
                     WeakReferenceMessenger.Default.Send(new NotifyMessage("获取数据异常"));
+                    return;
                 }
                 var allComments = result.comments!
                    .Where(x => x.content_type != 2)

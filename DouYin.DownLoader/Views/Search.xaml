@@ -22,7 +22,7 @@
             LastChildFill="True">
             <TextBlock
                 Width="60" Margin="10,0" VerticalAlignment="Center"
-                Text="主页链接" />
+                Text="关键词" />
             <TextBox
                 Width="320" Margin="10,0" md:HintAssist.Hint="请输入关键词"
                 Text="{Binding KeyWord}" />
