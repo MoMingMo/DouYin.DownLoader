@@ -298,7 +298,7 @@ namespace DouYin.DownLoader.ViewModels
                ShareCount = x.statistics!.share_count,
                CommentCount = x.statistics!.comment_count,
                DiggCount = x.statistics!.digg_count,
-
+               CreateAt = x.create_time,
            }).ToList();
             VideoItems = VideoItems.Concat(videos).DistinctBy(x => x.AwemeId).OrderByDescending(x => x.DiggCount).ToList();
             WeakReferenceMessenger.Default.Send(new NotifyMessage("获取数据成功", false));

@@ -101,7 +101,7 @@
     public class Video_Tag
     {
         public int? level { get; set; }
-        public int? tag_id { get; set; }
+        public long? tag_id { get; set; }
         public string? tag_name { get; set; }
     }
 

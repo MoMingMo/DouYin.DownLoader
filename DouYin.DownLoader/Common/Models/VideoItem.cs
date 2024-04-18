@@ -47,5 +47,7 @@ namespace DouYin.DownLoader.Common.Models
         public List<string>? Images { get; set; }
 
         public string MixName { get; set; } = default!;
+
+        public long CreateAt { get; set; }
     }
 }

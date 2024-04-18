@@ -130,7 +130,7 @@
         </md:Card>
         <Grid Grid.Row="2">
             <DockPanel Grid.Row="1">
-                <DockPanel Height="600">
+                <DockPanel Height="500">
                     <md:Card
                         Width="350" Margin="10,0,0,0" Padding="5"
                         Style="{StaticResource MaterialDesignOutlinedCard}">
@@ -183,7 +183,7 @@
                                 <TextBlock
                                     FontWeight="Bold"
                                     Style="{StaticResource DouYinText}"
-                                    Text="{Binding DouYin.DiggCount}" />
+                                    Text="{Binding DouYin.DiggCount, StringFormat='0.## K'}" />
                             </DockPanel>
                             <DockPanel Margin="10">
                                 <TextBlock

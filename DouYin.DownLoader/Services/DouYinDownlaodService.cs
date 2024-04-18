@@ -8,6 +8,8 @@ using System.Text.RegularExpressions;
 using System.Web;
 using DouYin.DownLoader.Common;
 using DouYin.DownLoader.Common.Models;
+using Microsoft.VisualBasic.ApplicationServices;
+using DryIoc.ImTools;
 
 namespace DouYin.DownLoader.Services
 {
@@ -17,7 +19,7 @@ namespace DouYin.DownLoader.Services
 
         public DouYinDownlaodService(IHttpClientFactory httpClientFactory)
         {
-            _client = httpClientFactory.CreateClient(Constant.DOU_YING);
+            _client = httpClientFactory.CreateClient();
             SetHeaders();
         }
         private string ms = string.Empty;
@@ -27,10 +29,25 @@ namespace DouYin.DownLoader.Services
             _client.BaseAddress = new Uri("https://www.douyin.com/");
             _client.DefaultRequestHeaders.Add("authority", "www.douyin.com");
             _client.DefaultRequestHeaders.Add("user-agent", Constant.UserAgent);
-            _client.DefaultRequestHeaders.Add("referer", "https://www.douyin.com/search/%E7%83%AD%E9%97%A8?publish_time=0&sort_type=0&source=switch_tab&type=video");
+            _client.DefaultRequestHeaders.Add("referer", "https://www.douyin.com/");
             var ms = GetMsToken();
             if (!string.IsNullOrWhiteSpace(Constant.Cookie))
                 _client.DefaultRequestHeaders.Add("cookie", string.Format(Constant.Cookie!, ms));
+        }
+        public async Task<DouYinDiscoverApiModel> GetDouYinDiscoverAsync()
+        {
+            var url = await GenerateRequestParams(Constant.DouYinDicoverUrl, Constant.UserAgent);
+            var discoverResutl = await _client.GetFromJsonAsync<DouYinDiscoverApiModel>(url);
+            //var cardsTask = discoverResutl!.cards.Select(async x =>
+            //    {
+            //        url = await GenerateRequestParams(string.Format(Constant.AwemeDetailUrl, x.aweme_info.aweme_id), Constant.UserAgent);
+            //        var awemeDetail = await _client.GetFromJsonAsync<DouYinAwemeDetailApiModel>(url);
+            //        x.aweme_info.video = awemeDetail?.aweme_detail?.video!;
+            //        return x;
+            //    });
+            //var cards = await Task.WhenAll(cardsTask);
+            //discoverResutl.cards = cards;
+            return discoverResutl!;
         }
         public async Task<DouYinUserProfileApiModel> GetUserProfileAsync(string userId)
         {
@@ -283,6 +300,6 @@ namespace DouYin.DownLoader.Services
             }
         }
 
-       
+
     }
 }

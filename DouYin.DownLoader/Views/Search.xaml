@@ -174,7 +174,7 @@
                             Value="50" />
 
                         <ListBox
-                            Grid.Row="1" Height="400"
+                            Grid.Row="1" MinHeight="400"
                             ItemsSource="{Binding Comments, Mode=TwoWay}"
                             ScrollViewer.HorizontalScrollBarVisibility="Hidden" ScrollViewer.VerticalScrollBarVisibility="Disabled">
                             <ListBox.ItemTemplate>
