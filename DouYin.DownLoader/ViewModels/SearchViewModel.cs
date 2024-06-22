@@ -211,70 +211,78 @@ namespace DouYin.DownLoader.ViewModels
         {
             _ = Task.Run(async () =>
             {
-                List<VideoItem> videos = new List<VideoItem>(0);
-                WeakReferenceMessenger.Default.Send(new NotifyMessage("开始请求数据", true));
-                if (string.IsNullOrWhiteSpace(KeyWord))
+                try
                 {
-                    var discoverResult = await _douYinDownlaodService.GetDouYinDiscoverAsync();
-                    if (discoverResult.status_code != 0)
+                    List<VideoItem> videos = new List<VideoItem>(0);
+                    WeakReferenceMessenger.Default.Send(new NotifyMessage("开始请求数据", true));
+                    if (string.IsNullOrWhiteSpace(KeyWord))
+                    {
+                        var discoverResult = await _douYinDownlaodService.GetDouYinDiscoverAsync();
+                        if (discoverResult.status_code != 0)
+                        {
+                            WeakReferenceMessenger.Default.Send(new NotifyMessage("获取数据异常"));
+                        }
+                        var videosTasks = discoverResult.cards!.Where(x => x.aweme_info.author != null).Select(async x =>
+                        {
+                            var aw = await _douYinDownlaodService.GetAwemeDetailAsync($"https://www.douyin.com/user/MS4wLjABAAAACirq2YgCDHFt4JJLwl1l5Hj4WpThkGSm8uKQJY7a2hU?modal_id={x.aweme_info.aweme_id}");
+
+                            return new VideoItem
+                            {
+                                AwemeType = x.aweme_info.aweme_type,
+                                AwemeId = x.aweme_info.aweme_id,
+                                NikName = x.aweme_info.author?.nickname,
+                                UId = x.aweme_info.author?.uid,
+                                Title = x.aweme_info.desc!,
+
+                                VideoCover = x.aweme_info.video!.cover!.url_list![0],
+                                Video = aw.aweme_detail.video!.play_addr!.url_list![0],
+                                CollectCount = x.aweme_info.statistics!.collect_count,
+                                ShareCount = x.aweme_info.statistics!.share_count,
+                                CommentCount = x.aweme_info.statistics!.comment_count,
+                                DiggCount = x.aweme_info.statistics!.digg_count,
+                                CreateAt = x.aweme_info.create_time,
+                            };
+                        }).ToList();
+                        videos = (await Task.WhenAll(videosTasks)).ToList();
+                        VideoItems = VideoItems.Concat(videos).DistinctBy(x => x.AwemeId)
+                            //.OrderByDescending(x => x.DiggCount)
+                            .ToList();
+                        WeakReferenceMessenger.Default.Send(new NotifyMessage("获取数据成功", false));
+                        return;
+                    }
+                    var result = await _douYinDownlaodService.GetSearchVideosAsync(KeyWord, _maxCursor);
+                    if (result.status_code != 0)
                     {
                         WeakReferenceMessenger.Default.Send(new NotifyMessage("获取数据异常"));
                     }
-                    var videosTasks = discoverResult.cards!.Where(x => x.aweme_info.author != null).Select(async x =>
+                    _maxCursor = result.cursor;
+                    _hasMore = result.has_more;
+                    videos = result.data!.Select(x => new VideoItem
                     {
-                        var aw = await _douYinDownlaodService.GetAwemeDetailAsync($"https://www.douyin.com/user/MS4wLjABAAAACirq2YgCDHFt4JJLwl1l5Hj4WpThkGSm8uKQJY7a2hU?modal_id={x.aweme_info.aweme_id}");
+                        AwemeType = x.aweme_info.aweme_type,
+                        AwemeId = x.aweme_info.aweme_id,
+                        NikName = x.aweme_info.author!.nickname,
+                        UId = x.aweme_info.author.uid,
+                        Title = x.aweme_info.desc!,
 
-                        return new VideoItem
-                        {
-                            AwemeType = x.aweme_info.aweme_type,
-                            AwemeId = x.aweme_info.aweme_id,
-                            NikName = x.aweme_info.author?.nickname,
-                            UId = x.aweme_info.author?.uid,
-                            Title = x.aweme_info.desc!,
-
-                            VideoCover = x.aweme_info.video!.cover!.url_list![0],
-                            Video = aw.aweme_detail.video!.play_addr!.url_list![0],
-                            CollectCount = x.aweme_info.statistics!.collect_count,
-                            ShareCount = x.aweme_info.statistics!.share_count,
-                            CommentCount = x.aweme_info.statistics!.comment_count,
-                            DiggCount = x.aweme_info.statistics!.digg_count,
-                            CreateAt = x.aweme_info.create_time,
-                        };
+                        VideoCover = x.aweme_info.video!.cover!.url_list![0],
+                        Video = x.aweme_info.video!.play_addr!.url_list![0],
+                        CollectCount = x.aweme_info.statistics!.collect_count,
+                        ShareCount = x.aweme_info.statistics!.share_count,
+                        CommentCount = x.aweme_info.statistics!.comment_count,
+                        DiggCount = x.aweme_info.statistics!.digg_count,
+                        CreateAt = x.aweme_info.create_time,
                     }).ToList();
-                    videos = (await Task.WhenAll(videosTasks)).ToList();
                     VideoItems = VideoItems.Concat(videos).DistinctBy(x => x.AwemeId)
                         //.OrderByDescending(x => x.DiggCount)
                         .ToList();
                     WeakReferenceMessenger.Default.Send(new NotifyMessage("获取数据成功", false));
-                    return;
                 }
-                var result = await _douYinDownlaodService.GetSearchVideosAsync(KeyWord, _maxCursor);
-                if (result.status_code != 0)
+                catch (Exception ex)
                 {
-                    WeakReferenceMessenger.Default.Send(new NotifyMessage("获取数据异常"));
-                }
-                _maxCursor = result.cursor;
-                _hasMore = result.has_more;
-                videos = result.data!.Select(x => new VideoItem
-                {
-                    AwemeType = x.aweme_info.aweme_type,
-                    AwemeId = x.aweme_info.aweme_id,
-                    NikName = x.aweme_info.author!.nickname,
-                    UId = x.aweme_info.author.uid,
-                    Title = x.aweme_info.desc!,
 
-                    VideoCover = x.aweme_info.video!.cover!.url_list![0],
-                    Video = x.aweme_info.video!.play_addr!.url_list![0],
-                    CollectCount = x.aweme_info.statistics!.collect_count,
-                    ShareCount = x.aweme_info.statistics!.share_count,
-                    CommentCount = x.aweme_info.statistics!.comment_count,
-                    DiggCount = x.aweme_info.statistics!.digg_count,
-                    CreateAt = x.aweme_info.create_time,
-                }).ToList();
-                VideoItems = VideoItems.Concat(videos).DistinctBy(x => x.AwemeId)
-                    //.OrderByDescending(x => x.DiggCount)
-                    .ToList();
-                WeakReferenceMessenger.Default.Send(new NotifyMessage("获取数据成功", false));
+                    WeakReferenceMessenger.Default.Send(new NotifyMessage("获取数据失败"+ex.Message, false));
+                }
             });
         }
 

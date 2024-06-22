@@ -75,42 +75,49 @@ namespace DouYin.DownLoader.ViewModels
         {
             _ = Task.Run(async () =>
              {
-                 var result = await _douYinDownlaodService.GetAwemeMixAwemesAsync(mixItem.MixId, 0);
-                 var videoItems = result.aweme_list.Select(x => new VideoItem
+                 try
                  {
-                     AwemeId = x.aweme_id,
-                     AwemeType = x.aweme_type,
-                     NikName = x.author.nickname,
-                     UId = x.author.uid,
-                     MixName = mixItem.MixTitle,
-                     VideoCover = x.video!.cover!.url_list![0],
-                     Video = x.video!.play_addr!.url_list![0],
-                     Images = x.images?.Select(x => x.url_list[0])?.ToList(),
-
-                 }).ToList();
-                 while (result.has_more == 1)
-                 {
-                     result = await _douYinDownlaodService.GetAwemeMixAwemesAsync(mixItem.MixId, result.cursor);
-                     var awemes = result.aweme_list.Select(x => new VideoItem
+                     var result = await _douYinDownlaodService.GetAwemeMixAwemesAsync(mixItem.MixId, 0);
+                     var videoItems = result.aweme_list.Select(x => new VideoItem
                      {
                          AwemeId = x.aweme_id,
                          AwemeType = x.aweme_type,
                          NikName = x.author.nickname,
                          UId = x.author.uid,
+                         MixName = mixItem.MixTitle,
                          VideoCover = x.video!.cover!.url_list![0],
                          Video = x.video!.play_addr!.url_list![0],
                          Images = x.images?.Select(x => x.url_list[0])?.ToList(),
+
                      }).ToList();
-                     videoItems.AddRange(awemes);
+                     while (result.has_more == 1)
+                     {
+                         result = await _douYinDownlaodService.GetAwemeMixAwemesAsync(mixItem.MixId, result.cursor);
+                         var awemes = result.aweme_list.Select(x => new VideoItem
+                         {
+                             AwemeId = x.aweme_id,
+                             AwemeType = x.aweme_type,
+                             NikName = x.author.nickname,
+                             UId = x.author.uid,
+                             VideoCover = x.video!.cover!.url_list![0],
+                             Video = x.video!.play_addr!.url_list![0],
+                             Images = x.images?.Select(x => x.url_list[0])?.ToList(),
+                         }).ToList();
+                         videoItems.AddRange(awemes);
+                     }
+                     WeakReferenceMessenger.Default.Send(new NotifyMessage($"开始下载合集" + mixItem.MixTitle, true));
+                     foreach (var item in videoItems)
+                     {
+                         await _douYinDownlaodService.DownLoadVideoAsync(item);
+                         await Task.Delay(500);
+                     }
+                     WeakReferenceMessenger.Default.Send(new NotifyMessage($"本次下载完成共{videoItems.Count}条记录", false));
+                     await Task.CompletedTask;
                  }
-                 WeakReferenceMessenger.Default.Send(new NotifyMessage($"开始下载合集" + mixItem.MixTitle, true));
-                 foreach (var item in videoItems)
+                 catch (Exception ex)
                  {
-                     await _douYinDownlaodService.DownLoadVideoAsync(item);
-                     await Task.Delay(500);
+                     WeakReferenceMessenger.Default.Send(new NotifyMessage($"下载合集异常{ex.Message}", false));
                  }
-                 WeakReferenceMessenger.Default.Send(new NotifyMessage($"本次下载完成共{videoItems.Count}条记录", false));
-                 await Task.CompletedTask;
 
              });
         }
@@ -167,7 +174,7 @@ namespace DouYin.DownLoader.ViewModels
             catch (Exception ex)
             {
                 IsShowHotCommentCard = Visibility.Hidden;
-                WeakReferenceMessenger.Default.Send(new NotifyMessage("获取评论异常"));
+                WeakReferenceMessenger.Default.Send(new NotifyMessage($"获取评论异常{ex.Message}"));
             }
 
 

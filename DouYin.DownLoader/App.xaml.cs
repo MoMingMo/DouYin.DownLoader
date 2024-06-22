@@ -29,17 +29,16 @@ namespace DouYin.DownLoader
                 new ServiceCollection()
 
                 .AddHttpClient()
-                .AddTransient<MainViewModel>()
-                .AddTransient<MainView>()
-
-
-                .AddTransient<HomeViewModel>()
-                .AddTransient<NoteViewModel>()
-                .AddTransient<SettingViewModel>()
-                  .AddTransient<SearchViewModel>()
+                .AddSingleton<MainViewModel>()
+                .AddSingleton<MainView>()
+                .AddSingleton<HomeViewModel>()
+                .AddSingleton<NoteViewModel>()
+                .AddSingleton<SettingViewModel>()
+                .AddSingleton<SearchViewModel>()
                 .AddScoped<IDouYinDownlaodService, DouYinDownlaodService>()
                 .AddSingleton<NavigationService>()
-                .BuildServiceProvider()); ;
+                .AddSingleton<ABogus>()
+                .BuildServiceProvider())  ;
             InitializeComponent();
         }
         protected override void OnStartup(StartupEventArgs e)

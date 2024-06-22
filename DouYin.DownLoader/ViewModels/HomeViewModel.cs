@@ -32,17 +32,18 @@ namespace DouYin.DownLoader.ViewModels
         [ObservableProperty]
         private UserProfile _userProfile;
         [ObservableProperty]
-        private bool isShowProfile=false;
+        private bool isShowProfile = false;
         private string userId;
         [RelayCommand]
         private async Task Download()
         {
-           IsShowProfile = false;
-            try
-            {
+            IsShowProfile = false;
 
-                _ = Task.Run(async () =>
+            _ = Task.Run(async () =>
+            {
+                try
                 {
+
                     ExtraUserId(Url);
                     var userProfile = await _douYinDownlaodService.GetUserProfileAsync(userId);
                     if (userProfile.status_code != 0)
@@ -54,64 +55,66 @@ namespace DouYin.DownLoader.ViewModels
                     UserProfile = new UserProfile
                     {
                         AvatorUrl = user.avatar_larger.url_list[0],
-                        NickName= user.nickname,
-                        FollowingCount=user.following_count,
-                        FollowerCount=user.max_follower_count,
-                        TotalFavoritedCount=user.total_favorited,
-                        Gender=user.gender==2?"女":"男",
-                        Country=user.country,
-                        Signature=user.signature.Trim(),
-                        UniqueId=user.unique_id,
-                        UserAge=user.user_age,
-                        IPLocation=user.ip_location,
-                        AwemeCount=user.aweme_count,
-                        
+                        NickName = user.nickname,
+                        FollowingCount = user.following_count,
+                        FollowerCount = user.max_follower_count,
+                        TotalFavoritedCount = user.total_favorited,
+                        Gender = user.gender == 2 ? "女" : "男",
+                        Country = user.country,
+                        Signature = user.signature.Trim(),
+                        UniqueId = user.unique_id,
+                        UserAge = user.user_age,
+                        IPLocation = user.ip_location,
+                        AwemeCount = user.aweme_count,
+
                     };
                     IsShowProfile = true;
-                });
-                var awemeDetail = await _douYinDownlaodService.GetAwemeDetailAsync(Url);
-                if (awemeDetail.status_code != 0)
-                {
-                    WeakReferenceMessenger.Default.Send(new NotifyMessage("请求接口异常"));
-                    return;
+                    var awemeDetail = await _douYinDownlaodService.GetAwemeDetailAsync(Url);
+                    if (awemeDetail.status_code != 0)
+                    {
+                        WeakReferenceMessenger.Default.Send(new NotifyMessage("请求接口异常"));
+                        return;
+                    }
+
+                    var author = awemeDetail!.aweme_detail!.author!;
+                    var video = awemeDetail!.aweme_detail!.video!;
+                    var nikName = author.nickname!;
+                    var uid = author.uid!;
+                    var aweme_id = awemeDetail.aweme_detail.aweme_id!;
+                    var aweme_type = awemeDetail.aweme_detail.aweme_type;
+                    var statistics = awemeDetail.aweme_detail.statistics!;
+                    var basePath = $"{AppContext.BaseDirectory}\\{nikName}_{uid}\\";
+                    var tags = awemeDetail.aweme_detail.video_tag!.Select(x => x.tag_name)!;
+
+                    var imageUlrs = awemeDetail.aweme_detail.images?.Select(x => x.url_list[0])?.ToList();
+
+                    DouYin = new VideoItem
+                    {
+                        Title = awemeDetail.aweme_detail.preview_title!,
+                        Avatar = awemeDetail.aweme_detail.author!.avatar_thumb!.url_list![0],
+                        NikName = nikName,
+                        Video = awemeDetail.aweme_detail.video!.play_addr!.url_list![0],
+                        VideoCover = awemeDetail.aweme_detail.video!.origin_cover!.url_list![0],
+                        CollectCount = statistics.collect_count,
+                        CommentCount = statistics.comment_count,
+                        ShareCount = statistics.share_count,
+                        DiggCount = statistics.digg_count,
+                        VideoTag = string.Join(' ', tags),
+                        UId = uid!,
+                        AwemeId = aweme_id!,
+                        AwemeType = aweme_type,
+                        Images = imageUlrs,
+                    };
+                    Player.Commands.Open.Execute(DouYin.Video);
+                    _ = _douYinDownlaodService.DownLoadVideoAsync(DouYin);
                 }
-
-                var author = awemeDetail!.aweme_detail!.author!;
-                var video = awemeDetail!.aweme_detail!.video!;
-                var nikName = author.nickname!;
-                var uid = author.uid!;
-                var aweme_id = awemeDetail.aweme_detail.aweme_id!;
-                var aweme_type = awemeDetail.aweme_detail.aweme_type;
-                var statistics = awemeDetail.aweme_detail.statistics!;
-                var basePath = $"{AppContext.BaseDirectory}\\{nikName}_{uid}\\";
-                var tags = awemeDetail.aweme_detail.video_tag!.Select(x => x.tag_name)!;
-
-                var imageUlrs = awemeDetail.aweme_detail.images?.Select(x => x.url_list[0])?.ToList();
-
-                DouYin = new VideoItem
+                catch (Exception ex)
                 {
-                    Title = awemeDetail.aweme_detail.preview_title!,
-                    Avatar = awemeDetail.aweme_detail.author!.avatar_thumb!.url_list![0],
-                    NikName = nikName,
-                    Video = awemeDetail.aweme_detail.video!.play_addr!.url_list![0],
-                    VideoCover = awemeDetail.aweme_detail.video!.origin_cover!.url_list![0],
-                    CollectCount = statistics.collect_count,
-                    CommentCount = statistics.comment_count,
-                    ShareCount = statistics.share_count,
-                    DiggCount = statistics.digg_count,
-                    VideoTag = string.Join(' ', tags),
-                    UId = uid!,
-                    AwemeId = aweme_id!,
-                    AwemeType = aweme_type,
-                    Images = imageUlrs,
-                };
-                Player.Commands.Open.Execute(DouYin.Video);
-                _ = _douYinDownlaodService.DownLoadVideoAsync(DouYin);
-            }
-            catch (Exception ex)
-            {
-                WeakReferenceMessenger.Default.Send(new NotifyMessage("下载数据异常"));
-            }
+                    WeakReferenceMessenger.Default.Send(new NotifyMessage("下载数据异常"));
+                }
+            });
+
+
         }
 
         private void ExtraUserId(string url)

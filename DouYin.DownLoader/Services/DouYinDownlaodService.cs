@@ -1,28 +1,34 @@
 ﻿using CommunityToolkit.Mvvm.Messaging;
-using Jint;
 using System.IO;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Web;
 using DouYin.DownLoader.Common;
 using DouYin.DownLoader.Common.Models;
-using Microsoft.VisualBasic.ApplicationServices;
-using DryIoc.ImTools;
+using System.Text.Json.Nodes;
+using Constant = DouYin.DownLoader.Common.Constant;
+using System.Text.Encodings.Web;
+using System.Web;
+using Jint;
 
 namespace DouYin.DownLoader.Services
 {
     public class DouYinDownlaodService : IDouYinDownlaodService
     {
         private HttpClient _client;
+        private HttpClient _aBougsHttpClient;
 
-        public DouYinDownlaodService(IHttpClientFactory httpClientFactory)
+        public DouYinDownlaodService(IHttpClientFactory httpClientFactory,ABogus aBogus)
         {
             _client = httpClientFactory.CreateClient();
+            _aBougsHttpClient= httpClientFactory.CreateClient();
             SetHeaders();
+            _aBogus = aBogus;
         }
         private string ms = string.Empty;
+        private readonly ABogus _aBogus;
+
         public void SetHeaders()
         {
 
@@ -32,26 +38,17 @@ namespace DouYin.DownLoader.Services
             _client.DefaultRequestHeaders.Add("referer", "https://www.douyin.com/");
             var ms = GetMsToken();
             if (!string.IsNullOrWhiteSpace(Constant.Cookie))
-                _client.DefaultRequestHeaders.Add("cookie", string.Format(Constant.Cookie!, ms));
+                _client.DefaultRequestHeaders.Add("cookie", string.Format(Constant.Cookie!, ""));
         }
         public async Task<DouYinDiscoverApiModel> GetDouYinDiscoverAsync()
         {
-            var url = await GenerateRequestParams(Constant.DouYinDicoverUrl, Constant.UserAgent);
+            var url = GenerateRequestWithXBogus(Constant.DouYinDicoverUrl, Constant.UserAgent);
             var discoverResutl = await _client.GetFromJsonAsync<DouYinDiscoverApiModel>(url);
-            //var cardsTask = discoverResutl!.cards.Select(async x =>
-            //    {
-            //        url = await GenerateRequestParams(string.Format(Constant.AwemeDetailUrl, x.aweme_info.aweme_id), Constant.UserAgent);
-            //        var awemeDetail = await _client.GetFromJsonAsync<DouYinAwemeDetailApiModel>(url);
-            //        x.aweme_info.video = awemeDetail?.aweme_detail?.video!;
-            //        return x;
-            //    });
-            //var cards = await Task.WhenAll(cardsTask);
-            //discoverResutl.cards = cards;
             return discoverResutl!;
         }
         public async Task<DouYinUserProfileApiModel> GetUserProfileAsync(string userId)
         {
-            var url = await GenerateRequestParams(string.Format(Constant.UserProfileUrl, userId), Constant.UserAgent);
+            var url = GenerateRequestWithXBogus(string.Format(Constant.UserProfileUrl, userId), Constant.UserAgent);
             var userProfile = await _client.GetFromJsonAsync<DouYinUserProfileApiModel>(url);
             return userProfile!;
         }
@@ -63,11 +60,12 @@ namespace DouYin.DownLoader.Services
         public async Task<DouYinAwemeDetailApiModel> GetAwemeDetailAsync(string url)
         {
             var modal_id = await ExtractModalId(url);
-
-            url = await GenerateRequestParams(string.Format(Constant.AwemeDetailUrl, modal_id), Constant.UserAgent);
-            var awemeDetail = await _client.GetFromJsonAsync<DouYinAwemeDetailApiModel>(url);
+            url = GenerateRequestWithAbogus(string.Format(Constant.AwemeDetailUrl, modal_id), Constant.UserAgent);
+            var res = await _client.GetAsync(url);
+            res.EnsureSuccessStatusCode();
+            var awemeDetail = await res.Content.ReadFromJsonAsync<DouYinAwemeDetailApiModel>();
             return awemeDetail!;
-
+     
         }
         /// <summary>
         /// 获取主页视频列表
@@ -77,7 +75,7 @@ namespace DouYin.DownLoader.Services
         /// <returns></returns>
         public async Task<DouYinAwemListApiModel> GetAuthorVideosAsync(string userId, long? max_cursor = 0)
         {
-            var url = await GenerateRequestParams(string.Format(Constant.AwemeListUrl, userId, max_cursor), Constant.UserAgent);
+            var url = GenerateRequestWithXBogus(string.Format(Constant.AwemeListUrl, userId, max_cursor), Constant.UserAgent);
             var awemeList = await _client.GetFromJsonAsync<DouYinAwemListApiModel>(url);
             return awemeList!;
         }
@@ -101,7 +99,7 @@ namespace DouYin.DownLoader.Services
         /// <returns></returns>
         public async Task<DouYinCommentListApiModel> GetAwemeCommentListAsync(string awemeId, long? max_cursor = 0)
         {
-            var url = await GenerateRequestParams(string.Format(Constant.AwemeCommenListtUrl, awemeId, max_cursor), Constant.UserAgent);
+            var url = GenerateRequestWithXBogus(string.Format(Constant.AwemeCommenListtUrl, awemeId, max_cursor), Constant.UserAgent);
             var awemeCommentList = await _client.GetFromJsonAsync<DouYinCommentListApiModel>(url);
             return awemeCommentList!;
         }
@@ -113,7 +111,7 @@ namespace DouYin.DownLoader.Services
         /// <returns></returns>
         public async Task<DouYinAwemeMixListApiModel> GetAwemeMixListAsync(string userId, long? max_cursor = 0)
         {
-            var url = await GenerateRequestParams(string.Format(Constant.AwemeMixListUrl, userId, max_cursor), Constant.UserAgent);
+            var url = GenerateRequestWithXBogus(string.Format(Constant.AwemeMixListUrl, userId, max_cursor), Constant.UserAgent);
             var awemeMixList = await _client.GetFromJsonAsync<DouYinAwemeMixListApiModel>(url);
             return awemeMixList!;
         }
@@ -150,7 +148,7 @@ namespace DouYin.DownLoader.Services
             try
             {
                 string? msg;
-                if (!File.Exists(coverFileName))
+                if (!System.IO.File.Exists(coverFileName))
                 {
                     using (HttpResponseMessage response = await _client.GetAsync(video.VideoCover, HttpCompletionOption.ResponseHeadersRead))
                     {
@@ -175,7 +173,7 @@ namespace DouYin.DownLoader.Services
                         videoFileName = $"{directory}{video.AwemeId}" + "_{0}.png";
                         var url = video.Images[i];
 
-                        if (!File.Exists(string.Format(videoFileName, i)))
+                        if (!System.IO.File.Exists(string.Format(videoFileName, i)))
                         {
                             using (HttpResponseMessage response = await _client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead))
                             {
@@ -197,7 +195,7 @@ namespace DouYin.DownLoader.Services
                 }
                 else
                 {
-                    if (!File.Exists(videoFileName))
+                    if (!System.IO.File.Exists(videoFileName))
                     {
                         using (HttpResponseMessage response = await _client.GetAsync(video.Video, HttpCompletionOption.ResponseHeadersRead))
                         {
@@ -231,16 +229,14 @@ namespace DouYin.DownLoader.Services
         /// <param name="url"></param>
         /// <param name="userAgent"></param>
         /// <returns></returns>
-        private async Task<string> GenerateRequestParams(string url, string userAgent)
+        private string GenerateRequestWithXBogus(string url, string userAgent)
         {
-
-            Uri uri = new(url);
+            Uri uri = new(Constant.DouYinBaseApi + url);
             string query = HttpUtility.ParseQueryString(uri.Query).ToString()!;
             var engine = new Engine();
             engine.Execute(File.ReadAllText("./douyin_x-bogus.js"));
             var xbogus = engine.Invoke("sign", query, userAgent).AsString();
             string newUrl = url + "&X-Bogus=" + xbogus;
-
             return newUrl;
         }
         /// <summary>
@@ -259,6 +255,13 @@ namespace DouYin.DownLoader.Services
                 randomStr.Append(baseStr[random.Next(baseStr.Length)]);
             }
             return randomStr.ToString();
+        }
+        private string GenerateRequestWithAbogus(string url, string userAgent)
+        {
+           
+            var a_bogus = _aBogus.GetValue(Constant.DouYinBaseApi + url, userAgent);
+            url = url + "&a_bogus=" + a_bogus;
+            return url;
         }
         /// <summary>
         /// 生成mstoken
